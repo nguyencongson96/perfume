@@ -11,15 +11,10 @@ const handleOrderByUser = {
       const user = req.user;
       !user && _throw(401, "Unauthorized");
 
-      //Get userId
-      const foundUser = await Users.find(
-        { username: user },
-        { userId: 0 }
-      ).exec();
-      const userId = foundUser[0]._id.toString();
-
       // Search for a order with the given id
-      const foundOrders = await Orders.find({ userId }).exec();
+      const foundOrders = await Orders.find({
+        userId: (await Users.findOne({ username: user }, { userId: 0 }))._id,
+      }).exec();
 
       // If there is no order with that id, return a 204 status code with a message saying that there is no cart match id
       if (foundOrders.length === 0)
@@ -42,13 +37,9 @@ const handleOrderByUser = {
       const user = req.user;
       !user && _throw(401, "Unauthorized");
 
-      //Find user infor and get userId
-      const foundUser = await Users.find({ username: user });
-      const userId = foundUser[0]._id;
-
       //Find Pending order based on userId and Pending status
       const foundOrder = await Orders.findOne({
-        userId: userId,
+        userId: (await Users.findOne({ username: user }))._id,
         status: "Pending",
       }).exec();
 
@@ -77,8 +68,8 @@ const handleOrderByUser = {
         return res.status(204).json({ msg: `Cannot find Order` });
 
       //Throw error if cannot find user
-      const foundUser = await Users.find({ username: user }).exec();
-      const userId = foundUser[0]._id;
+      const foundUser = await Users.findOne({ username: user }).exec();
+      const userId = foundUser._id;
       userId.toString() !== foundOrder.userId.toString() &&
         _throw(401, "Permission is not granted");
 
@@ -113,8 +104,8 @@ const handleOrderByUser = {
 
         //In case user is login, throw error if user try to add another Pending Order when they already have one, or user did not add address info
       } else {
-        const foundUser = await Users.find({ username: req.user }).exec();
-        userId = foundUser[0]._id.toString();
+        const foundUser = await Users.findOne({ username: req.user }).exec();
+        userId = foundUser._id.toString();
         if (status === "Pending")
           (await Orders.findOne({ userId, status: "Pending" })) &&
             _throw(400, "An user have only one Pending Order");
@@ -191,17 +182,18 @@ const handleOrderByUser = {
         !orderStatus.updatePending.includes(status) &&
         _throw(400, "Invalid Status");
 
-      //Throw error if cannot find user
-      const foundUser = await Users.find({ username: user }).exec();
-      const userId = foundUser[0]._id;
-
       //Find Pending Order
-      const foundOrder = await Orders.findOne({ userId, status: "Pending" });
+      const foundOrder = await Orders.findOne({
+        userId: (await Users.findOne({ username: user }))._id,
+        status: "Pending",
+      });
       if (!foundOrder)
         return res.status(204).json({ msg: `Cannot find an Pending Order` });
 
       //In case user update order status to Dispatched, address is required
-      status !== "Pending" && !address && _throw(400, "Address are required");
+      status !== "Pending" &&
+        (!address || !name || !phone) &&
+        _throw(400, "Infor is required");
 
       //Reinstall products in order
       foundOrder.cart = [];
@@ -239,10 +231,11 @@ const handleOrderByUser = {
         status !== "Pending" && (stock -= quantity);
       }
       // Save the updated order
-      status && (foundOrder.status = status);
-      name && (foundOrder.name = name);
-      phone && (foundOrder.phone = phone);
-      foundOrder.address = address;
+      const keyArr = ["status", "name", "phone", "address"];
+      keyArr.forEach((key) => {
+        const value = req.body[key];
+        value && (foundOrder[key] = value);
+      });
 
       // Return the updated order
       const updateCart = await foundOrder.save();
@@ -260,13 +253,9 @@ const handleOrderByUser = {
       const user = req.user;
       !user && _throw(401, "Unauthorized");
 
-      //Find userinfor and userId
-      const foundUser = await Users.find({ username: user }).exec(),
-        userId = foundUser[0]._id;
-
       //Find and delete order of logged in user in pending state
       const foundOrder = await Orders.findOneAndDelete({
-        userId,
+        userId: (await Users.findOne({ username: user }))._id,
         status: "Pending",
       }).exec();
 
