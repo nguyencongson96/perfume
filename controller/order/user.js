@@ -92,10 +92,10 @@ const handleOrderByUser = {
   },
   addNewOrder: async (req, res) => {
     try {
-      const { status, cart, address } = req.body;
+      const { status, cart, name, address } = req.body;
       let { phone } = req.body;
       // Throw an error if the order information is not provided
-      (!cart || !status) && _throw(400, "Order infor and status are required");
+      (!cart || !status) && _throw(400, "cart and status are required");
 
       // Throw an error if the order information is not an array
       !Array.isArray(cart) && _throw(400, "Invalid order infor");
@@ -109,8 +109,7 @@ const handleOrderByUser = {
       if (!req.user) {
         userId = await new mongoose.Types.ObjectId().toString();
         status !== "Dispatched" && _throw(400, "Invalid status when not login");
-        (!phone || !address) &&
-          _throw(400, "Require phone, address when user is not login");
+        !phone && _throw(400, "Require phone when user is not login");
 
         //In case user is login, throw error if user try to add another Pending Order when they already have one, or user did not add address info
       } else {
@@ -119,7 +118,8 @@ const handleOrderByUser = {
         if (status === "Pending")
           (await Orders.findOne({ userId, status: "Pending" })) &&
             _throw(400, "An user have only one Pending Order");
-        else !address && _throw(400, "Address is required");
+        else
+          (!address || !name) && _throw(400, "Name and address are required");
         !phone && (phone = foundUser.phone);
       }
 
@@ -163,6 +163,7 @@ const handleOrderByUser = {
       // Create a new order and return it as JSON data
       const newCart = await Orders.create({
         userId,
+        name,
         phone,
         address,
         status,
@@ -179,7 +180,7 @@ const handleOrderByUser = {
   },
   updateOrder: async (req, res) => {
     try {
-      const { status, cart, phone, address } = req.body;
+      const { status, cart, name, phone, address } = req.body;
 
       //Check if user login or not
       const user = req.user;
@@ -239,6 +240,7 @@ const handleOrderByUser = {
       }
       // Save the updated order
       status && (foundOrder.status = status);
+      name && (foundOrder.name = name);
       phone && (foundOrder.phone = phone);
       foundOrder.address = address;
 
