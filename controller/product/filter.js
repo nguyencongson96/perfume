@@ -44,7 +44,7 @@ const getProductsByFilter = {
 
       //Check whether query has any key match allowKey array, if not send status 400
       !keyArr.every((val) => keyQuery.search.includes(val)) &&
-        _throw(400, "Invalid key of Query");
+        _throw(400, "Invalid Query key");
 
       const { name, sort, page, field } = query;
       //Check whether field query has any value that is not included in allowKey Array
