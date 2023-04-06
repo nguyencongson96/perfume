@@ -4,8 +4,9 @@ import Users from "../../model/Users.js";
 import _throw from "../throw.js";
 
 const handleLogin = async (req, res) => {
-  const { user, pwd } = req.body;
   try {
+    const { user, pwd } = req.body;
+
     //Input validation
     (!user || user.length < 3 || !pwd || pwd.length < 8) &&
       _throw(400, "Invalid username or password");
