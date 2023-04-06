@@ -1,0 +1,72 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
+
+.login {
+  padding-top: 200px;
+  text-align: center;
+  height: 100vh;
+  font-family: "Raleway", sans-serif;
+  background: url("https://cdn5.f-cdn.com/contestentries/1578585/21468461/5d62b49ac544b_thumb900.jpg")
+    no-repeat;
+  background-size: cover;
+  color: black;
+}
+
+.login-header {
+  font-size: 4rem;
+  color: rgba(75, 101, 132, 1);
+  margin-bottom: 20px;
+  font-family: "Pacifico", cursive;
+}
+
+.login-form {
+  width: 25%;
+  min-width: 450px;
+  margin: auto;
+  margin-bottom: 20px;
+}
+
+.input {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form label {
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+.login-form input {
+  padding: 5px 10px;
+  font-size: 1.3rem;
+  border-radius: 5px;
+  border: 1px solid gray;
+}
+
+.submit {
+  width: 20%;
+  margin: 0 40%;
+  margin-top: 20px;
+  font-size: 1.1rem;
+  padding: 10px 5px;
+  border-radius: 5px;
+  border: none;
+  background-color: rgba(149, 165, 166, 1);
+  color: white;
+  box-shadow: 2px 5px 5px gray;
+  cursor: pointer;
+  font-family: "Raleway", sans-serif;
+}
+
+.submit:active {
+  box-shadow: none;
+  transition: all 100ms ease-in-out;
+  margin-top: 22px;
+}
+
+.noti {
+  font-weight: 700;
+  color: rgba(253, 114, 114, 1);
+}
