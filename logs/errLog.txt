@@ -1,0 +1,19 @@
+11:26:55	05-04-2023	4e72b027-f62f-47d7-9351-cfd9f50a8e68	TypeError: res.headers is not a function
+11:27:16	05-04-2023	735ccc32-f72f-4219-87d3-cb0ef2ce7484	TypeError: res.headers is not a function
+11:27:16	05-04-2023	f30a6878-cf87-4e00-86ce-2e06e8923ceb	TypeError: res.headers is not a function
+11:27:27	05-04-2023	be5394ce-7c01-4e9a-8bde-7d9d6e4a8f27	TypeError: res.headers is not a function
+11:27:27	05-04-2023	5b7a7369-4332-4401-a91b-9c874cdd60e4	TypeError: res.headers is not a function
+20:08:12	05-04-2023	8170dab3-49ae-477f-abda-4607fe0ce60d	Error: Not allowed by CORS
+20:09:22	05-04-2023	72034b84-70c8-4425-be14-f12f303c6030	Error: Not allowed by CORS
+20:09:59	05-04-2023	a63d563d-d7b7-401a-9ac9-fb2f8e2259a7	Error: Not allowed by CORS
+20:24:20	05-04-2023	fba539ae-7674-400e-9c87-bad3f38f6db2	Error: Not allowed by CORS
+20:25:08	05-04-2023	672e18a0-1d9c-4280-a329-3fc02ce13b22	Error: Not allowed by CORS
+20:25:19	05-04-2023	220f66eb-b642-4bec-9232-56f881874f92	Error: Not allowed by CORS
+20:29:41	05-04-2023	048ab69e-7e34-4fe7-9447-884efd69d580	ReferenceError: originsURL is not defined
+21:07:35	05-04-2023	6c5147fe-9b51-467c-ba32-9b7137fc0705	Error: Not allowed by CORS
+21:08:10	05-04-2023	cec864d1-0c90-4f99-8f8e-032b2e2bbaea	Error: Not allowed by CORS
+21:08:20	05-04-2023	d99ef229-bc88-4541-a2ce-d6c656b30e22	Error: Not allowed by CORS
+21:09:03	05-04-2023	cee305a7-0892-499f-a458-ef5abb41c35b	Error: Not allowed by CORS
+21:09:48	05-04-2023	a1be8a3f-776a-41e9-a638-8043740298b4	Error: Not allowed by CORS
+21:10:36	05-04-2023	f93c570d-16d4-407a-8456-d9eaf2299b65	Error: Not allowed by CORS
+21:11:07	05-04-2023	41c5a17a-cc06-4023-a99b-927070c096a1	Error: Not allowed by CORS
