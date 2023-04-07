@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import Users from "../../model/Users.js";
 import _throw from "../throw.js";
 
-const handleLogin = {
+const authController = {
   logIn: async (req, res) => {
     try {
       const { user, pwd } = req.body;
@@ -23,6 +23,8 @@ const handleLogin = {
       const foundRoles = Object.values(foundUser.roles).filter(
         (role) => role !== undefined
       );
+
+      //Generate new accessToken
       const accessToken = jwt.sign(
         {
           userInfo: {
@@ -34,11 +36,13 @@ const handleLogin = {
         { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION }
       );
 
+      //Generate new refreshToken
       const refreshToken = jwt.sign(
         { username: foundUser.username },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
       );
+
       //Saving refresh token with current User
       foundUser.refreshToken = refreshToken;
       await foundUser.save();
@@ -49,10 +53,11 @@ const handleLogin = {
         maxAge:
           parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
         sameSite: "Lax",
-        secure: "true",
+        secure: true,
+        signed: true,
       });
 
-      //Send Access Token to front
+      //Send accessToken to frontend
       res.json({
         username: foundUser.username,
         roles: foundRoles,
@@ -67,15 +72,15 @@ const handleLogin = {
   },
   logOut: async (req, res) => {
     try {
-      const cookie = req.cookies;
+      const cookie = req.signedCookies;
+      //Check whether jwt key exist in cookie
       if (!cookie.jwt) return res.sendStatus(204);
+
       const refreshToken = cookie.jwt;
-      res.clearCookie("jwt", {
-        httpOnly: true,
-        maxAge: 1 * 24 * 60 * 60 * 1000,
-        sameSite: "Lax",
-        secure: "true",
-      });
+      //Clear cookie
+      res.clearCookie("jwt");
+
+      //Check validation of refreshToken get from jwt key
       const foundUser = await Users.findOne({ refreshToken });
       !foundUser && _throw(403);
 
@@ -93,17 +98,17 @@ const handleLogin = {
   register: async (req, res) => {
     const { user, email, phone, pwd } = req.body;
     try {
-      (!user || !pwd || !email || !phone) && _throw(400, "Lack information");
+      (!user || !pwd || !email || !phone) && _throw(400, "Lack infor");
 
-      (user.length < 3 ||
-        pwd.length < 8 ||
-        !email.includes("@") ||
-        phone.length < 10) &&
-        _throw(400, "Invalid Input Infor");
+      //Check input validation
+      user.length < 3 && _throw(400, "Username too short");
+      pwd.length < 8 && _throw(400, "Password too short");
+      !email.includes("@") && _throw(400, "Invalid email");
+      phone.length < 10 && _throw(400, "Invalid phone number");
 
       //check for username has already existed in DB or not
       const duplicate = await Users.findOne({ username: user }).exec();
-      duplicate && _throw(409, "User has already registered");
+      duplicate && _throw(409, "User has existed");
 
       //encypt the password
       const hashedPwd = await bcrypt.hash(pwd, 10);
@@ -125,4 +130,4 @@ const handleLogin = {
   },
 };
 
-export default handleLogin;
+export default authController;

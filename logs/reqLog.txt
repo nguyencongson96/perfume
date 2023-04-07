@@ -193,3 +193,16 @@
 14:40:48	07-04-2023	5816114b-d045-4280-bc1b-91d4d51be44d	PUT	undefined	/order/admin/642c3d05ccb36a60237d6a08
 15:07:12	07-04-2023	5fbddad1-b41e-441f-b824-dbc1d82730a4	GET	undefined	/edit/
 15:07:20	07-04-2023	d19d06f6-823c-45c3-a818-3265978399f2	GET	undefined	/products?sort=nac&aroma=amber.ambergris
+15:26:46	07-04-2023	b1efecf2-d78d-4efd-a4d7-0c22258ff80c	GET	undefined	/products?sort=nac&aroma=amber.ambergris
+15:27:08	07-04-2023	9b7f2971-82c3-4e8a-82b6-87ce811274f6	GET	undefined	/products?sort=nac&aroma=amber.ambergris
+15:27:52	07-04-2023	6dd60bb7-e521-4983-8a0f-efa61852c54c	POST	undefined	/login
+15:28:00	07-04-2023	ab03b8b3-b6ec-4b50-b5bd-3b2193392b53	POST	undefined	/auth/login
+18:21:17	07-04-2023	532750b1-80a3-4661-9974-36b02be78d55	POST	undefined	/auth/login
+18:21:43	07-04-2023	5727c3ee-cabc-4590-86e6-0d5f1d6a4175	POST	undefined	/auth/login
+18:21:58	07-04-2023	27e0a12e-42ee-4596-b9aa-f12512192e4a	POST	undefined	/auth/login
+18:23:56	07-04-2023	54e8ac26-d960-4b11-8181-97f3ed5a7136	POST	undefined	/refresh
+18:24:07	07-04-2023	aeebb3f1-0e91-4a21-b8bb-7da85a5697f3	POST	undefined	/refresh
+18:26:41	07-04-2023	17fb1e87-eae8-4587-9fce-fdef2aca66ea	POST	undefined	/auth/login
+18:26:45	07-04-2023	f1fb3e20-90bf-435f-9e4e-5ccce91f8e40	POST	undefined	/refresh
+18:26:54	07-04-2023	52f2f757-b8b7-4a5a-b5b5-90cd0cef9352	POST	undefined	/auth/login
+18:27:36	07-04-2023	3c9def8e-a750-4770-aa68-648a1f1ec9ac	POST	undefined	/refresh
