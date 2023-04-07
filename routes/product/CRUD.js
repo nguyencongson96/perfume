@@ -14,11 +14,21 @@ const {
   test,
 } = productCRUD;
 
-router.route("/").get(getAllProduct).put(test);
+//Route get detail infor of a product
 router.route("/:id").get(getAProduct);
 
+//Need accessToken to do the next route
 router.use(verifyJWT, verifyRoles(ROLES_LIST.Admin));
-router.route("/").post(addProduct).patch(updateProduct);
+
+//Route get detail of all products, add a new product, update a product
+router
+  .route("/")
+  .get(getAllProduct)
+  .post(addProduct)
+  .patch(updateProduct)
+  .put(test);
+
+//Route delete a product
 router.route("/:id").delete(deleteProduct);
 
 export default router;
