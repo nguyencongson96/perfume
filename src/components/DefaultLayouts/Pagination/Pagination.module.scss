@@ -1,0 +1,31 @@
+
+.wrapper{
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 15%;
+}
+.page-number{
+    --page-width-height: 30px;
+    display: inline-block;
+    text-align: center;
+    width: var( --page-width-height);
+    height: var(--page-width-height);
+    padding: 4px;
+    line-height: 22px;
+    margin-left: 4px;
+    border-radius: 4px;
+    background-color: var(--color-grey-300);
+    font-size: 1.2rem;
+    font-weight: 600;
+
+    &:hover{
+        background-color: rgb(21, 21, 139);
+        color:aliceblue;
+        cursor: pointer;
+    }
+
+}
+.active{
+    background-color: rgb(21, 21, 139);
+    color:aliceblue;
+}
