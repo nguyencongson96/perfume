@@ -126,3 +126,17 @@
 21:24:26	06-04-2023	1a4ffcf4-ebb1-4f25-9ea5-c27585c027b0	PUT	undefined	/order/user
 21:28:06	06-04-2023	070510ed-c602-4b0d-bbdd-6671c6ce216d	PUT	undefined	/order/user
 21:32:11	06-04-2023	033acd47-ccb0-410e-805e-cda1cc143a36	PUT	undefined	/order/user
+10:35:03	07-04-2023	0ce452f1-b04c-4afe-9ce1-306c812a2274	GET	undefined	/products/distinct/aroma-type
+10:36:25	07-04-2023	da6c65bc-965d-4604-9588-652ce0290920	GET	undefined	/products/distinct/aroma-type
+10:36:41	07-04-2023	768f2e9c-0f22-491a-a8df-bb63c4e027e8	GET	undefined	/products/distinct/aroma
+10:37:05	07-04-2023	d9525777-842e-4e22-817e-4dfd32a8f3b9	GET	undefined	/products/distinct/aroma-type
+10:37:20	07-04-2023	858ba65b-2cc2-4da7-bea5-0b291d39a6b3	GET	undefined	/products/distinct/aroma-type
+10:37:34	07-04-2023	c538d4fd-b052-4ebc-b940-9abbbeeb3801	GET	undefined	/products/distinct/aroma-type
+10:38:54	07-04-2023	29688854-458d-42b8-b454-5e4568c48784	GET	undefined	/products/distinct/aroma-type
+10:39:18	07-04-2023	954dc49c-d46c-4a83-883b-e8eb685cfab4	GET	undefined	/products/distinct/aroma-type
+10:39:51	07-04-2023	d31bce4a-2fc3-4415-8350-b18bd3c47a5f	GET	undefined	/products/distinct/aroma-type
+10:40:15	07-04-2023	c5be2180-e327-4752-bfc7-bd2e717f0ad7	GET	undefined	/products/distinct/aroma-type
+10:40:42	07-04-2023	5394c2e0-079b-42ac-86db-33756ead9abf	GET	undefined	/products/distinct/aroma-type
+10:47:04	07-04-2023	9d688ea8-0fde-48fe-8418-d3c17379ac22	GET	undefined	/products/distinct/aroma-type
+10:51:51	07-04-2023	9ba0215a-dda1-401b-a80b-9ef5f4511df5	GET	undefined	/products?sort=nac&aroma=amber.ambergris
+10:52:13	07-04-2023	68c23731-9596-4043-b60f-54715ecd2702	GET	undefined	/products?sort=nac&aroma=amber.ambergris

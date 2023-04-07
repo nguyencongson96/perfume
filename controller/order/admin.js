@@ -1,7 +1,7 @@
 import Orders from "../../model/Orders.js";
 import Products from "../../model/Products.js";
-import orderStatus from "../../config/orderStatus.js";
 import _throw from "../throw.js";
+import { keyQuery, orderStatus } from "../../config/keyQuery.js";
 
 const handleOrderByAdmin = {
   getOrders: async (req, res) => {
@@ -43,14 +43,15 @@ const handleOrderByAdmin = {
   updateOrder: async (req, res) => {
     try {
       const { id } = req.params,
-        { status, phone, address } = req.body;
+        { status } = req.body;
 
       // Throw error if id value is invalid
       !id && _throw(400, "Id is required");
       typeof id !== "string" && _throw(400, "Invalid Id");
 
       //Throw error if status value is invalid
-      (!status || (status && !orderStatus.updatebyAdmin.includes(status))) &&
+      status &&
+        !orderStatus.updatebyAdmin.includes(status) &&
         _throw(400, "Invalid status");
 
       //Response 204 if cannot find the order
@@ -77,13 +78,14 @@ const handleOrderByAdmin = {
               await foundProduct.save();
             }
           }
-          //Always update status
-          foundOrder.status = status;
           break;
       }
       // Save the updated order
-      phone && (foundOrder.phone = phone);
-      address && (foundOrder.address = address);
+      const updateKey = keyQuery.orderKey.update;
+      updateKey.forEach((key) => {
+        const value = req.body[key];
+        value && (foundOrder[key] = value);
+      });
 
       // Return the updated order
       const updateCart = await foundOrder.save();

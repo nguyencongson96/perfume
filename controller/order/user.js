@@ -1,8 +1,8 @@
 import Orders from "../../model/Orders.js";
 import Products from "../../model/Products.js";
 import Users from "../../model/Users.js";
-import orderStatus from "../../config/orderStatus.js";
 import _throw from "../throw.js";
+import { keyQuery, orderStatus } from "../../config/keyQuery.js";
 
 const handleOrderByUser = {
   getOrders: async (req, res) => {
@@ -179,7 +179,7 @@ const handleOrderByUser = {
 
       //Check if status valid or not
       status &&
-        !orderStatus.updatePending.includes(status) &&
+        !orderStatus.updatebyUser.includes(status) &&
         _throw(400, "Invalid Status");
 
       //Find Pending Order
@@ -231,8 +231,8 @@ const handleOrderByUser = {
         status !== "Pending" && (stock -= quantity);
       }
       // Save the updated order
-      const keyArr = ["status", "name", "phone", "address"];
-      keyArr.forEach((key) => {
+      const updateKey = keyQuery.orderKey.update;
+      updateKey.forEach((key) => {
         const value = req.body[key];
         value && (foundOrder[key] = value);
       });
