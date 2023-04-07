@@ -8,11 +8,9 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import dbConnect from "./config/dbConnect.js";
-import register from "./routes/register.js";
-import login from "./routes/login.js";
-import logout from "./routes/logout.js";
-import productCRUD from "./routes/api/productsCRUD.js";
-import productsFilter from "./routes/api/productsFilter.js";
+import auth from "./routes/auth.js";
+import productCRUD from "./routes/product/CRUD.js";
+import productsFilter from "./routes/product/filter.js";
 import orderAdmin from "./routes/orders/admin.js";
 import orderUser from "./routes/orders/user.js";
 import refresh from "./routes/refresh.js";
@@ -52,14 +50,12 @@ app.use(
 );
 
 //Routes
-app.use("/register", register);
-app.use("/login", login);
-app.use("/logout", logout);
+app.use("/auth", auth);
+app.use("/refresh", refresh);
 app.use("/edit", productCRUD);
 app.use("/products", productsFilter);
 app.use("/order/admin", orderAdmin);
 app.use("/order/user", orderUser);
-app.use("/refresh", refresh);
 
 //Handle Errors
 app.use(errHandler);

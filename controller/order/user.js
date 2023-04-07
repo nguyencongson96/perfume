@@ -2,7 +2,8 @@ import Orders from "../../model/Orders.js";
 import Products from "../../model/Products.js";
 import Users from "../../model/Users.js";
 import _throw from "../throw.js";
-import { keyQuery, orderStatus } from "../../config/keyQuery.js";
+import keyQuery from "../../config/order/keyQuery.js";
+import orderStatus from "../../config/order/orderStatus.js";
 
 const handleOrderByUser = {
   getOrders: async (req, res) => {
@@ -92,7 +93,7 @@ const handleOrderByUser = {
       !Array.isArray(cart) && _throw(400, "Invalid order infor");
 
       // Throw an error if invalid status
-      !orderStatus.updatePending.includes(status) &&
+      !orderStatus.updatebyUser.includes(status) &&
         _throw(400, "Invalid status");
 
       //In case user is not login, create random userId and if user do not give phone number, throw error
@@ -231,8 +232,7 @@ const handleOrderByUser = {
         status !== "Pending" && (stock -= quantity);
       }
       // Save the updated order
-      const updateKey = keyQuery.orderKey.update;
-      updateKey.forEach((key) => {
+      keyQuery.update.forEach((key) => {
         const value = req.body[key];
         value && (foundOrder[key] = value);
       });

@@ -1,7 +1,8 @@
 import Orders from "../../model/Orders.js";
 import Products from "../../model/Products.js";
 import _throw from "../throw.js";
-import { keyQuery, orderStatus } from "../../config/keyQuery.js";
+import keyQuery from "../../config/order/keyQuery.js";
+import orderStatus from "../../config/order/orderStatus.js";
 
 const handleOrderByAdmin = {
   getOrders: async (req, res) => {
@@ -81,8 +82,7 @@ const handleOrderByAdmin = {
           break;
       }
       // Save the updated order
-      const updateKey = keyQuery.orderKey.update;
-      updateKey.forEach((key) => {
+      keyQuery.update.forEach((key) => {
         const value = req.body[key];
         value && (foundOrder[key] = value);
       });

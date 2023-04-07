@@ -1,15 +1,14 @@
 import Products from "../../model/Products.js";
 import mergeSort from "./sort.js";
-import Pagination from "../../config/pagination.js";
-import { keyQuery } from "../../config/keyQuery.js";
+import Pagination from "../../config/filter/pagination.js";
+import keyQuery from "../../config/filter/keyQuery.js";
 import _throw from "../throw.js";
 
-const { limit } = Pagination,
-  { productKey } = keyQuery;
+const { limit } = Pagination;
 
 // This function takes a string as an argument and returns an object with a comparison operator and a number.
 const compareSymbol = (arr, key) => {
-  if (productKey.numberCompare.includes(key))
+  if (keyQuery.numberCompare.includes(key))
     return arr.map((item) => {
       return {
         [key]:
@@ -24,7 +23,7 @@ const compareSymbol = (arr, key) => {
             : { $eq: Number(item) },
       };
     });
-  else if (productKey.includeCompare.includes(key))
+  else if (keyQuery.includeCompare.includes(key))
     return arr.map((item) => {
       return { [key]: new RegExp(item, "i") };
     });
@@ -44,13 +43,13 @@ const getProductsByFilter = {
       keyArr.length === 0 && _throw(400, "Query Params is required");
 
       //Check whether query has any key match allowKey array, if not send status 400
-      !keyArr.every((val) => productKey.search.includes(val)) &&
+      !keyArr.every((val) => keyQuery.search.includes(val)) &&
         _throw(400, "Invalid Query key");
 
       const { name, sort, page, field } = query;
       //Check whether field query has any value that is not included in allowKey Array
       const fieldArr = !field ? [] : field.split("-");
-      !fieldArr.every((field) => productKey.all.includes(field)) &&
+      !fieldArr.every((field) => keyQuery.all.includes(field)) &&
         _throw(400, "Invalid value of field Query");
 
       // Find products that match the query object
@@ -100,12 +99,12 @@ const getProductsByFilter = {
       keyArr.length === 0 && _throw(400, "Query Params is required");
 
       //Check whether query has any key match allowKey array, if not send status 400
-      !keyArr.every((val) => productKey.filter.includes(val)) &&
+      !keyArr.every((val) => keyQuery.filter.includes(val)) &&
         _throw(400, "Invalid Query key");
 
       //Check whether have to filter by finding exact condition
       const matchObj = queryArr.reduce((obj, [key, value]) => {
-        !productKey.uncompare.includes(key) &&
+        !keyQuery.uncompare.includes(key) &&
           (obj = {
             ...obj,
             ...(value.includes("-")
@@ -120,7 +119,7 @@ const getProductsByFilter = {
       //Check whether have to filter field or not
       const fieldArr = !query.field ? [] : query.field.split("-");
       fieldArr.length > 0 &&
-        !fieldArr.every((field) => productKey.all.includes(field)) &&
+        !fieldArr.every((field) => keyQuery.all.includes(field)) &&
         _throw(400, "Invalid value of field Query");
       const fieldObj = fieldArr.reduce((obj, val) => {
         return { ...obj, [val]: 1 };

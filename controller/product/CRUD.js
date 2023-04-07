@@ -1,6 +1,6 @@
 import Products from "../../model/Products.js";
 import mergeSort from "./sort.js";
-import Pagination from "../../config/pagination.js";
+import Pagination from "../../config/filter/pagination.js";
 import _throw from "../throw.js";
 
 const productCRUD = {
@@ -137,12 +137,16 @@ const productCRUD = {
     }
   },
   test: async (req, res) => {
-    const list = req.body;
-    for (const item of list) {
-      const { _id, type } = item;
-      const foundProduct = await Products.findById(_id);
-      foundProduct.type = type;
-      await foundProduct.save();
+    try {
+      const productsList = await Products.find();
+      const result = productsList.reduce((arr, product, index) => {
+        product.price.length > 1 && arr.push(index);
+        return arr;
+      }, []);
+      res.status(200).json(result);
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
     }
   },
 };

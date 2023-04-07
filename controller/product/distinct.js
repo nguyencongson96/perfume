@@ -1,8 +1,8 @@
 import Products from "../../model/Products.js";
-import { keyQuery } from "../../config/keyQuery.js";
+import keyQuery from "../../config/filter/keyQuery.js";
 import _throw from "../throw.js";
 
-const distinctKey = keyQuery.productKey.distinct;
+const distinctKey = keyQuery.distinct;
 
 // Define an asynchronous function named getDistinctList that accepts two parameters, req and res
 const getDistinctList = async (req, res) => {

@@ -4,7 +4,6 @@ import handleOrderByUser from "../../controller/order/user.js";
 import verifyUser from "../../middleware/verifyUser.js";
 
 router.use(verifyUser);
-
 router
   .route("/")
   .get(handleOrderByUser.getOrders)

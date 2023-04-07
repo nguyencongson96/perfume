@@ -1,4 +1,4 @@
-import sortStyle from "../../config/sortStyle.js";
+import sortStyle from "../../config/filter/sortStyle.js";
 
 //Require sortStyle is combination of key shorthand and method sorthand
 function mergeSort(arr, method) {
