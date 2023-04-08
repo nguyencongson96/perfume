@@ -9,8 +9,7 @@ const authController = {
       const { user, pwd } = req.body;
 
       //Input validation
-      (!user || user.length < 3 || !pwd || pwd.length < 8) &&
-        _throw(400, "Invalid username or password");
+      (!user || !pwd) && _throw(400, "Invalid username or password");
 
       const foundUser = await Users.findOne({ username: user }).exec();
       !foundUser && _throw(401, "User not found");
@@ -65,9 +64,16 @@ const authController = {
       });
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error occurred while logging in" });
+      err.name === "ValidationError"
+        ? res.status(400).json(
+            Object.keys(err.errors).reduce((obj, key) => {
+              obj[key] = err.errors[key].message;
+              return obj;
+            }, {})
+          )
+        : err.status
+        ? res.status(err.status).json(err.msg)
+        : res.status(500).send("Error occurred while logging in");
     }
   },
   logOut: async (req, res) => {
@@ -76,13 +82,13 @@ const authController = {
       //Check whether jwt key exist in cookie
       if (!cookie.jwt) return res.sendStatus(204);
 
-      const refreshToken = cookie.jwt;
-      //Clear cookie
-      res.clearCookie("jwt");
-
       //Check validation of refreshToken get from jwt key
+      const refreshToken = cookie.jwt;
       const foundUser = await Users.findOne({ refreshToken });
       !foundUser && _throw(403);
+
+      //Clear cookie
+      res.clearCookie("jwt");
 
       // Delete Refresh Token
       foundUser.refreshToken = "";
@@ -90,21 +96,14 @@ const authController = {
       res.sendStatus(204);
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error occurred while logging out" });
+      err.status
+        ? res.status(err.status).json(err.msg)
+        : res.status(500).send("Error occurred while adding new order");
     }
   },
   register: async (req, res) => {
-    const { user, email, phone, pwd } = req.body;
     try {
-      (!user || !pwd || !email || !phone) && _throw(400, "Lack infor");
-
-      //Check input validation
-      user.length < 3 && _throw(400, "Username too short");
-      pwd.length < 8 && _throw(400, "Password too short");
-      !email.includes("@") && _throw(400, "Invalid email");
-      phone.length < 10 && _throw(400, "Invalid phone number");
+      const { user, email, phone, pwd } = req.body;
 
       //check for username has already existed in DB or not
       const duplicate = await Users.findOne({ username: user }).exec();
@@ -120,12 +119,18 @@ const authController = {
         password: hashedPwd,
       });
       console.log(result);
-      res.status(201).json({ message: `New user ${user} has been created` });
+      res.status(201).json(`New user ${user} has been created`);
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error occurred while registering" });
+      err.name === "ValidationError"
+        ? res.status(400).json(
+            Object.keys(err.errors).reduce((obj, key) => {
+              obj[key] = err.errors[key].message;
+              return obj;
+            }, {})
+          )
+        : err.status
+        ? res.status(err.status).json(err.msg)
+        : res.status(500).send("Error occurred while registering");
     }
   },
 };

@@ -17,3 +17,4 @@
 21:09:48	05-04-2023	a1be8a3f-776a-41e9-a638-8043740298b4	Error: Not allowed by CORS
 21:10:36	05-04-2023	f93c570d-16d4-407a-8456-d9eaf2299b65	Error: Not allowed by CORS
 21:11:07	05-04-2023	41c5a17a-cc06-4023-a99b-927070c096a1	Error: Not allowed by CORS
+16:20:07	08-04-2023	fcb97d9b-f0e9-459e-86c3-4c085df1c31f	ReferenceError: token is not defined

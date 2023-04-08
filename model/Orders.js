@@ -1,21 +1,63 @@
 import mongoose from "mongoose";
+import validator from "validator";
+import _throw from "../controller/throw.js";
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
   userId: { type: mongoose.ObjectId, require: true },
-  name: { type: String },
-  phone: { type: String, require: false },
-  address: { type: String },
-  status: { type: String, require: true },
-  total: { type: Number, require: true },
-  cart: {
-    type: Array,
-    of: {
-      productId: { type: String, require: true },
-      quantity: { type: Number, require: true, min: 1 },
-      capacity: { type: Number, require: true },
-      price: { type: Number, required: true },
+  name: String,
+  phone: {
+    type: String,
+    validate: (val) => {
+      !validator.isNumeric(val) && _throw(400, "Invalid phone number");
     },
+  },
+  address: String,
+  status: {
+    type: String,
+    require: true,
+  },
+  total: {
+    type: Number,
+    default: 0,
+    validate: (val) => {
+      val < 0 && _throw(400, "Invalid total");
+    },
+  },
+  cart: {
+    type: [
+      {
+        productId: { type: mongoose.ObjectId, require: true },
+        quantity: {
+          type: Number,
+          default: 0,
+          require: true,
+          validate: (val) => {
+            val < 0 && _throw(400, "Invalid quantity");
+          },
+        },
+
+        capacity: {
+          type: Number,
+          require: true,
+          default: 0,
+          validate: (val) => {
+            (!validator.isInt(val.toString()) || val < 0) &&
+              _throw(400, "Invalid capacity");
+          },
+        },
+
+        price: {
+          type: Number,
+          require: true,
+          default: 0,
+          validate: (val) => {
+            (!validator.isInt(val.toString()) || val < 0) &&
+              _throw(400, "Invalid price");
+          },
+        },
+      },
+    ],
     require: true,
   },
 });

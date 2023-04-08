@@ -27,9 +27,9 @@ const handleOrderByUser = {
         .json({ total: foundOrders.length, list: foundOrders });
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error while getting orders" });
+      err.status
+        ? res.status(err.status).json(err.msg)
+        : req.status(500).json("Error while getting orders");
     }
   },
   getPendingOrder: async (req, res) => {
@@ -50,9 +50,9 @@ const handleOrderByUser = {
       else return res.status(200).json(foundOrder);
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error while getting an order" });
+      err.status
+        ? res.status(err.status).json(err.msg)
+        : req.status(500).json("Error while getting pending order");
     }
   },
   getOneOrder: async (req, res) => {
@@ -77,22 +77,20 @@ const handleOrderByUser = {
       return res.status(200).json(foundOrder);
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error while getting an order" });
+      err.status
+        ? res.status(err.status).json(err.msg)
+        : req.status(500).json("Error while getting an order");
     }
   },
   addNewOrder: async (req, res) => {
     try {
       const { status, cart, name, address } = req.body;
       let { phone } = req.body;
-      // Throw an error if the order information is not provided
-      (!cart || !status) && _throw(400, "cart and status are required");
 
-      // Throw an error if the order information is not an array
-      !Array.isArray(cart) && _throw(400, "Invalid order infor");
+      //Check whether cart is an array or not
+      !Array.isArray(cart) && _throw(400, "Invalid cart");
 
-      // Throw an error if invalid status
+      //Check whether staus valid or not
       !orderStatus.updatebyUser.includes(status) &&
         _throw(400, "Invalid status");
 
@@ -100,56 +98,43 @@ const handleOrderByUser = {
       let userId = "";
       if (!req.user) {
         userId = await new mongoose.Types.ObjectId().toString();
-        status !== "Dispatched" && _throw(400, "Invalid status when not login");
         !phone && _throw(400, "Require phone when user is not login");
+        status !== "Dispatched" && _throw(400, "Invalid status when not login");
 
         //In case user is login, throw error if user try to add another Pending Order when they already have one, or user did not add address info
       } else {
-        const foundUser = await Users.findOne({ username: req.user }).exec();
-        userId = foundUser._id.toString();
-        if (status === "Pending")
-          (await Orders.findOne({ userId, status: "Pending" })) &&
-            _throw(400, "An user have only one Pending Order");
-        else
-          (!address || !name) && _throw(400, "Name and address are required");
+        userId = (await Users.findOne({ username: req.user }))._id.toString();
         !phone && (phone = foundUser.phone);
+        status === "Pending"
+          ? (await Orders.findOne({ userId, status: "Pending" })) &&
+            _throw(400, "An user have only one Pending Order")
+          : (!address || !name) && _throw(400, "Address, Name required");
       }
 
       //Update cart in order
       let total = 0;
-      for (const item of cart) {
-        let { productId, quantity, capacity } = item;
-        // Throw an error if invalid product information
-        if (
-          !productId ||
-          !quantity ||
-          !capacity ||
-          !Number(quantity) ||
-          !Number(capacity) ||
-          quantity < 1
-        )
-          _throw(400, "Invalid product information");
-
+      for (const { productId, quantity, capacity, price } of cart) {
         // Check if there is a product matching the productId in the database
         const foundProduct = await Products.findById(productId);
         if (!foundProduct) _throw(400, `No product matches id ${productId}`);
 
-        // Throw an error if there is not enough stock for a product in the order
-        if (quantity > foundProduct.stock)
-          _throw(400, `Not enough stock of ${foundProduct.name}`);
-
-        // Get the price of the item based on its capacity
+        //Find position of capacity in array
         const capacityIndex = foundProduct.capacity.findIndex(
           (i) => i === Number(capacity)
         );
+        capacityIndex < 0 && _throw(400, `Invalid capacity`);
 
-        if (capacityIndex < 0) _throw(400, "Invalid capacity");
-        else item.price = foundProduct.price[capacityIndex];
+        //Get price
+        price = foundProduct.price[capacityIndex];
 
-        // Update stock of product and calculate total price of order
-        if (status !== "Pending") foundProduct.stock[capacityIndex] -= quantity;
+        //Get quantity and save
+        let { name, stock } = foundProduct;
+        quantity > stock && _throw(400, `Not enough stock of ${name}`);
+        status !== "Pending" && (stock[capacityIndex] -= quantity);
         await foundProduct.save();
-        total += quantity * item.price;
+
+        //Set total
+        total += quantity * price;
       }
 
       // Create a new order and return it as JSON data
@@ -165,23 +150,33 @@ const handleOrderByUser = {
       return res.status(201).json(newCart);
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error while adding an order" });
+      err.name === "ValidationError"
+        ? res.status(400).json(
+            Object.keys(err.errors).reduce((obj, key) => {
+              obj[key] = err.errors[key].message;
+              return obj;
+            }, {})
+          )
+        : err.status
+        ? res.status(err.status).json(err.msg)
+        : res.status(500).send("Error occurred while adding new order");
     }
   },
   updateOrder: async (req, res) => {
     try {
       const { status, cart, name, phone, address } = req.body;
 
-      //Check if user login or not
-      const user = req.user;
-      !user && _throw(401, "Unauthorized");
-
       //Check if status valid or not
       status &&
         !orderStatus.updatebyUser.includes(status) &&
         _throw(400, "Invalid Status");
+
+      //Check whether cart is an array or not
+      !Array.isArray(cart) && _throw(400, "Invalid cart");
+
+      //Check if user login or not
+      const user = req.user;
+      !user && _throw(401, "Unauthorized");
 
       //Find Pending Order
       const foundOrder = await Orders.findOne({
@@ -192,22 +187,16 @@ const handleOrderByUser = {
         return res.status(204).json({ msg: `Cannot find an Pending Order` });
 
       //In case user update order status to Dispatched, address is required
-      status !== "Pending" &&
-        (!address || !name || !phone) &&
-        _throw(400, "Infor is required");
+      if (status !== "Pending") {
+        !address && _throw(400, "Address required");
+        !name && _throw(400, "Name required");
+        !phone && _throw(400, "Phone required");
+      }
 
       //Reinstall products in order
       foundOrder.cart = [];
       foundOrder.total = 0;
-      for (const item of cart) {
-        const { productId, quantity, capacity } = item;
-
-        //Check valid input product
-        (!productId ||
-          (quantity && (!Number(quantity) || quantity < 1)) ||
-          (capacity && !Number(capacity))) &&
-          _throw(400, "Invalid product information");
-
+      for (const { productId, quantity, capacity } of cart) {
         //Find product
         const foundProduct = await Products.findById(productId);
         !foundProduct && _throw(400, `No product matches id ${productId}`);
@@ -216,21 +205,22 @@ const handleOrderByUser = {
         const capacityIndex = foundProduct.capacity.findIndex(
           (ele) => ele === capacity
         );
-        //Check valid capacity
         capacityIndex < 0 && _throw(400, `Invalid capacity`);
 
-        let price = foundProduct.price[capacityIndex],
-          stock = foundProduct.stock[capacityIndex],
-          name = foundProduct.name;
+        //Update price
+        const price = foundProduct.price[capacityIndex];
 
-        //Check stock
-        stock < quantity && _throw(400, `Not enough stock of ${name}`);
+        //Update stock
+        let stock = foundProduct.stock[capacityIndex];
+        stock < quantity &&
+          _throw(400, `Not enough stock of ${foundProduct.name}`);
+        status !== "Pending" && (stock -= quantity);
 
         //Push product to order, calculate total price of order, and only minus stock if status is no longer Pending
         foundOrder.cart.push({ productId, quantity, capacity, price });
         foundOrder.total += quantity * price;
-        status !== "Pending" && (stock -= quantity);
       }
+
       // Save the updated order
       keyQuery.update.forEach((key) => {
         const value = req.body[key];
@@ -242,9 +232,16 @@ const handleOrderByUser = {
       return res.status(200).json(updateCart);
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error while updating an order" });
+      err.name === "ValidationError"
+        ? res.status(400).json(
+            Object.keys(err.errors).reduce((obj, key) => {
+              obj[key] = err.errors[key].message;
+              return obj;
+            }, {})
+          )
+        : err.status
+        ? res.status(err.status).json(err.msg)
+        : res.status(500).send("Error occurred while updating order");
     }
   },
   deleteOrder: async (req, res) => {
@@ -260,17 +257,14 @@ const handleOrderByUser = {
       }).exec();
 
       //Check if there is any pending order to delete or not
-      if (!foundOrder)
-        return res
-          .status(204)
-          .json({ msg: `There is no order in pending state` });
-
-      return res.status(200).json({ msg: `Cart pending has been deleted` });
+      !foundOrder
+        ? res.status(204).json(`There is no order in pending state`)
+        : res.status(200).json(`Cart pending has been deleted`);
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error while removing an order" });
+      err.status
+        ? res.status(err.status).json(err.msg)
+        : req.status(500).json("Error while deleting pending order");
     }
   },
 };
