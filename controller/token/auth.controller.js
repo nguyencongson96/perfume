@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Users from "../../model/users.model.js";
+import Tokens from "../../model/token.model.js";
 import _throw from "../throw.js";
 
 const authController = {
@@ -42,10 +43,6 @@ const authController = {
         { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
       );
 
-      //Saving refresh token with current User
-      foundUser.refreshToken = refreshToken;
-      await foundUser.save();
-
       //Add refresh Token to Cookie
       res.cookie("jwt", refreshToken, {
         httpOnly: true,
@@ -55,6 +52,21 @@ const authController = {
         secure: true,
         signed: true,
       });
+
+      //Save token to db
+      const foundToken = await Tokens.findOne({ userId: foundUser._id });
+      if (!foundToken) {
+        const newTokenUser = await Tokens.create({
+          userId: foundUser._id,
+          accessToken,
+          refreshToken,
+        });
+        console.log(newTokenUser);
+      } else {
+        foundToken.accessToken = accessToken;
+        foundToken.refreshToken = refreshToken;
+        await foundToken.save();
+      }
 
       //Send accessToken to frontend
       res.json({
@@ -84,15 +96,16 @@ const authController = {
 
       //Check validation of refreshToken get from jwt key
       const refreshToken = cookie.jwt;
-      const foundUser = await Users.findOne({ refreshToken });
-      !foundUser && _throw(403);
+      // Delete Refresh Token
+      const foundToken = await Tokens.findOneAndUpdate(
+        { refreshToken },
+        { accessToken: "", refreshToken: "" }
+      );
+      !foundToken && _throw(403);
 
       //Clear cookie
       res.clearCookie("jwt");
 
-      // Delete Refresh Token
-      foundUser.refreshToken = "";
-      await foundUser.save();
       res.sendStatus(204);
     } catch (err) {
       console.log(err);

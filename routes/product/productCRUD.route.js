@@ -4,6 +4,7 @@ import productCRUD from "../../controller/product/productCRUD.controller.js";
 import ROLES_LIST from "../../config/rolesList.config.js";
 import verifyRoles from "../../middleware/verifyRoles.middleware.js";
 import verifyJWT from "../../middleware/verifyJWT.middleware.js";
+import getDistinctList from "../../controller/product/distinct.js";
 
 const {
   getAllProduct,

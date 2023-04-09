@@ -113,7 +113,9 @@ const handleOrderByUser = {
 
       //Update cart in order
       let total = 0;
-      for (const { productId, quantity, capacity, price } of cart) {
+      for (const item of cart) {
+        const { productId, quantity, capacity } = item;
+        let { price } = item;
         // Check if there is a product matching the productId in the database
         const foundProduct = await Products.findById(productId);
         if (!foundProduct) _throw(400, `No product matches id ${productId}`);

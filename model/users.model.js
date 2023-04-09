@@ -39,7 +39,6 @@ const userSchema = new Schema({
     User: { type: Number, default: 0 },
     Admin: { type: Number },
   },
-  refreshToken: { type: String },
 });
 
 const userModel = mongoose.model("Users", userSchema);
