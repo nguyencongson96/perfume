@@ -1,6 +1,5 @@
 const whiteList = [
-  "https://nguyencongson96.github.io/frontend/",
-  "https://nguyencongson96.github.io/login",
+  "https://perfume-8hxg.onrender.com",
   "http://localhost:3000",
   "http://localhost:4000",
 ];
