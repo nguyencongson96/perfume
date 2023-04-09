@@ -6,16 +6,16 @@ import _throw from "../throw.js";
 const authController = {
   logIn: async (req, res) => {
     try {
-      const { user, pwd } = req.body;
+      const { user, password } = req.body;
 
       //Input validation
-      (!user || !pwd) && _throw(400, "Invalid username or password");
+      (!user || !password) && _throw(400, "Invalid username or password");
 
       const foundUser = await Users.findOne({ username: user }).exec();
       !foundUser && _throw(401, "User not found");
 
       // Evaluate password
-      const match = await bcrypt.compare(pwd, foundUser.password);
+      const match = await bcrypt.compare(password, foundUser.password);
       !match && _throw(401, "Password has not matched");
 
       //Create JWTs
@@ -98,19 +98,19 @@ const authController = {
       console.log(err);
       err.status
         ? res.status(err.status).json(err.msg)
-        : res.status(500).send("Error occurred while adding new order");
+        : res.status(500).send("Error occurred while logging out");
     }
   },
   register: async (req, res) => {
     try {
-      const { user, email, phone, pwd } = req.body;
+      const { user, email, phone, password } = req.body;
 
       //check for username has already existed in DB or not
       const duplicate = await Users.findOne({ username: user }).exec();
       duplicate && _throw(409, "User has existed");
 
       //encypt the password
-      const hashedPwd = await bcrypt.hash(pwd, 10);
+      const hashedPwd = await bcrypt.hash(password, 10);
       //create and store the new user
       const result = await Users.create({
         username: user,
