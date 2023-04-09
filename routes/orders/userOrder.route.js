@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
-import handleOrderByUser from "../../controller/order/user.js";
-import verifyUser from "../../middleware/verifyUser.js";
+import handleOrderByUser from "../../controller/order/userOrder.controller.js";
+import verifyUser from "../../middleware/verifyUser.middleware.js";
 
 router.use(verifyUser);
 router

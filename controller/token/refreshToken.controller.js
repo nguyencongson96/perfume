@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import Users from "../../model/Users.js";
+import Users from "../../model/users.model.js";
 import _throw from "../throw.js";
 
 const handleRefreshToken = async (req, res) => {

@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import getProductsByFilter from "../../controller/product/filter.js";
+import getProductsByFilter from "../../controller/product/productFilter.controller.js";
 import getDistinctList from "../../controller/product/distinct.js";
 
 //Route filter

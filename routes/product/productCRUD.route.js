@@ -1,9 +1,9 @@
 import express from "express";
 const router = express.Router();
-import productCRUD from "../../controller/product/CRUD.js";
-import ROLES_LIST from "../../config/rolesList.js";
-import verifyRoles from "../../middleware/verifyRoles.js";
-import verifyJWT from "../../middleware/verifyJWT.js";
+import productCRUD from "../../controller/product/productCRUD.controller.js";
+import ROLES_LIST from "../../config/rolesList.config.js";
+import verifyRoles from "../../middleware/verifyRoles.middleware.js";
+import verifyJWT from "../../middleware/verifyJWT.middleware.js";
 
 const {
   getAllProduct,

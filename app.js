@@ -7,17 +7,17 @@ import { fileURLToPath } from "url";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
-import dbConnect from "./config/dbConnect.js";
-import auth from "./routes/auth.js";
-import productCRUD from "./routes/product/CRUD.js";
-import productsFilter from "./routes/product/filter.js";
-import orderAdmin from "./routes/orders/admin.js";
-import orderUser from "./routes/orders/user.js";
-import refresh from "./routes/refresh.js";
-import { logger } from "./middleware/logEvents.js";
-import errHandler from "./middleware/errHandler.js";
-import credentials from "./middleware/credentials.js";
-import { corsOptions } from "./config/corsOptions.js";
+import dbConnect from "./config/dbConnect.config.js";
+import auth from "./routes/auth.route.js";
+import productCRUD from "./routes/product/productCRUD.route.js";
+import productsFilter from "./routes/product/productFilter.route.js";
+import adminOrder from "./routes/orders/adminOrder.route.js";
+import userOrder from "./routes/orders/userOrder.route.js";
+import refresh from "./routes/refresh.route.js";
+import { logger } from "./middleware/logEvents.middleware.js";
+import errHandler from "./middleware/errHandler.middleware.js";
+import credentials from "./middleware/credentials.middleware.js";
+import { corsOptions } from "./config/corsOptions.config.js";
 const PORT = process.env.PORT || 4000;
 
 //Connect to MongoDB
@@ -54,8 +54,8 @@ app.use("/auth", auth);
 app.use("/refresh", refresh);
 app.use("/edit", productCRUD);
 app.use("/products", productsFilter);
-app.use("/order/admin", orderAdmin);
-app.use("/order/user", orderUser);
+app.use("/order/admin", adminOrder);
+app.use("/order/user", userOrder);
 
 //Handle Errors
 app.use(errHandler);

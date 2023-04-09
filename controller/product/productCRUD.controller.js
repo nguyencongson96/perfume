@@ -1,6 +1,6 @@
-import Products from "../../model/Products.js";
+import Products from "../../model/products.model.js";
 import mergeSort from "./sort.js";
-import Pagination from "../../config/filter/pagination.js";
+import Pagination from "../../config/filter/pagination.config.js";
 import _throw from "../throw.js";
 
 const productCRUD = {

@@ -1,8 +1,8 @@
-import Orders from "../../model/Orders.js";
-import Products from "../../model/Products.js";
+import Orders from "../../model/orders.model.js";
+import Products from "../../model/products.model.js";
 import _throw from "../throw.js";
-import keyQuery from "../../config/order/keyQuery.js";
-import orderStatus from "../../config/order/orderStatus.js";
+import keyQuery from "../../config/order/orderKey.config.js";
+import orderStatus from "../../config/order/orderStatus.config.js";
 
 const handleOrderByAdmin = {
   getOrders: async (req, res) => {

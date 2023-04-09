@@ -1,4 +1,4 @@
-import { logEvents } from "../middleware/logEvents.js";
+import { logEvents } from "./logEvents.middleware.js";
 
 const errHandler = (err, req, res, next) => {
   logEvents(`${err.name}: ${err.message}`, "errLog.txt");
