@@ -1,5 +1,5 @@
 const whiteList = [
-  "https://perfume-8hxg.onrender.com",
+  "https://perfume-frontend.onrender.com",
   "http://localhost:3000",
   "http://localhost:4000",
 ];
