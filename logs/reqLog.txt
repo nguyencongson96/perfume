@@ -347,3 +347,8 @@
 18:03:50	09-04-2023	d9448e70-d432-4b9e-a6a4-6f1568e4a39a	POST	undefined	/auth/login
 18:08:48	09-04-2023	57078ba4-53c6-4765-81c1-d1e5b3a64c33	POST	undefined	/auth/login
 18:09:18	09-04-2023	c9ed0d1d-e65c-4bd7-b268-854a0350c6fe	POST	undefined	/auth/login
+18:59:45	09-04-2023	083587c6-08c0-45c8-976a-7029aaed1586	POST	undefined	/auth/register/
+19:03:29	09-04-2023	96b9c505-d622-4d55-92d8-16d7fc4407c6	POST	undefined	/auth/register/
+19:03:42	09-04-2023	f44dd986-8f2d-4035-b698-2403641e7715	POST	undefined	/auth/register/
+19:04:24	09-04-2023	436481a8-e759-48d8-9720-25cf4d5e5b9a	POST	undefined	/auth/register/
+19:05:09	09-04-2023	8dd75d7a-1e19-4ba8-9a39-2f1522d63998	POST	undefined	/auth/register/

@@ -52,8 +52,8 @@ app.use(
 //Routes
 app.use("/auth", auth);
 app.use("/refresh", refresh);
-app.use("/edit", productCRUD);
-app.use("/products", productsFilter);
+app.use("/products", productCRUD);
+app.use("/filter", productsFilter);
 app.use("/order/admin", adminOrder);
 app.use("/order/user", userOrder);
 

@@ -121,6 +121,7 @@ const authController = {
       console.log(result);
       res.status(201).json(`New user ${user} has been created`);
     } catch (err) {
+      console.log(err);
       err.name === "ValidationError"
         ? res.status(400).json(
             Object.keys(err.errors).reduce((obj, key) => {
@@ -130,7 +131,7 @@ const authController = {
           )
         : err.status
         ? res.status(err.status).json(err.msg)
-        : res.status(500).send("Error occurred while registering");
+        : res.status(500).json("Error occurred while registering");
     }
   },
 };
