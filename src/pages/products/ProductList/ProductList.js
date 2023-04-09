@@ -30,6 +30,7 @@ const ProductsList = () => {
         setAmountOfPage(Math.ceil(response.total / 9));
         setProductList(newResponse.list);
       } catch (error) {
+        console.log(error);
         throw new Error("Invalid Data");
       }
     };
