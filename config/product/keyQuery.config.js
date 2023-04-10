@@ -27,6 +27,7 @@ const keyQuery = {
     "random",
   ],
   distinct: ["brand", "type", "aroma", "capacity"],
+  getList: ["image", "name", "price", "stock"],
 };
 
 export default keyQuery;

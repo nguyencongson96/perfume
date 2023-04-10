@@ -1,5 +1,5 @@
 import Products from "../../model/products.model.js";
-import keyQuery from "../../config/filter/filterKey.config.js";
+import keyQuery from "../../config/product/keyQuery.config.js";
 import _throw from "../throw.js";
 
 const distinctKey = keyQuery.distinct;

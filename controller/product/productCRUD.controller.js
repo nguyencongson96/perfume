@@ -1,20 +1,21 @@
 import Products from "../../model/products.model.js";
-import mergeSort from "./sort.js";
-import Pagination from "../../config/filter/pagination.config.js";
+import Pagination from "../../config/product/pagination.config.js";
+import keyQuery from "../../config/product/keyQuery.config.js";
 import _throw from "../throw.js";
+
+const { limit } = Pagination;
 
 const productCRUD = {
   getAllProduct: async (req, res) => {
     try {
-      const productsList = await Products.find();
+      const productsList = await Products.find({}, keyQuery.getList.join(" "));
       if (!productsList || productsList.length === 0) {
         return res.status(204).json({ msg: "No product found" });
       }
-      const sortList = mergeSort(productsList, "nac");
       res.json({
-        total: sortList.length,
-        limit: Pagination.products_per_page,
-        list: sortList,
+        total: productsList.length,
+        limit: limit,
+        list: productsList,
       });
     } catch (err) {
       console.log(err);

@@ -1,7 +1,7 @@
 import Products from "../../model/products.model.js";
-import Pagination from "../../config/filter/pagination.config.js";
-import keyQuery from "../../config/filter/filterKey.config.js";
-import sortConfig from "../../config/filter/sortStyle.config.js";
+import Pagination from "../../config/product/pagination.config.js";
+import keyQuery from "../../config/product/keyQuery.config.js";
+import sortConfig from "../../config/product/sortStyle.config.js";
 import _throw from "../throw.js";
 
 const { limit } = Pagination;
@@ -34,13 +34,11 @@ const convertMatchCond = (arr, key) => {
         })) // Return an array of objects with the comparison symbol and number if a comparison symbol was found
       : arr.map((item) => ({ [key]: { $eq: Number(item) } })); // Return an array of objects with a number that is equal to the item
   }
-  // If the key contains an include comparison symbol
-  else if (keyQuery.includeCompare.includes(key))
-    // Return an array of objects with a regular expression
-    return arr.map((item) => ({ [key]: new RegExp(item, "i") }));
-  // If the key does not contain a comparison symbol
-  // Return an array of objects with a regular expression that matches exactly
-  else return arr.map((item) => ({ [key]: new RegExp(`^${item}$`, "i") }));
+  // If the key does not contain a number comparison symbol
+  else
+    return keyQuery.includeCompare.includes(key) //If the key contains an include comparison symbol
+      ? arr.map((item) => ({ [key]: new RegExp(item, "i") })) // Return an array of objects with a regular expression
+      : arr.map((item) => ({ [key]: new RegExp(`^${item}$`, "i") })); // Return an array of objects with a regular expression that matches exactly
 };
 
 const getProductsByFilter = async (req, res) => {
@@ -54,11 +52,6 @@ const getProductsByFilter = async (req, res) => {
     //Check whether query has any key match allowKey array, if not send status 400
     !keyArr.every((val) => keyQuery.filter.some((key) => val.includes(key))) &&
       _throw(400, "Invalid key Query");
-
-    //Check whether have to filter field or not
-    query.field &&
-      query.field.split("-").some((field) => !keyQuery.all.includes(field)) &&
-      _throw(400, "Invalid field Query");
 
     //Check sort value
     query.sort &&
@@ -80,25 +73,23 @@ const getProductsByFilter = async (req, res) => {
               (obj = {
                 ...obj,
                 ...(value.includes("-")
-                  ? { $and: convertMatchCond(value.split("-"), key) }
+                  ? { $and: convertMatchCond(value.split("-"), key) } // if value includes '-', use $and operator
                   : value.includes(".")
-                  ? { $or: convertMatchCond(value.split("."), key) }
-                  : convertMatchCond(value.split(), key)[0]),
+                  ? { $or: convertMatchCond(value.split("."), key) } // if value includes '.', use $or operator
+                  : convertMatchCond(value.split(), key)[0]), // else do not use and or or operator
               });
             return obj;
           }, {}),
         },
-        //Get specific fields want to get
-        query.field
-          ? {
-              $project: query.field.split("-").reduce((obj, val) => {
-                return { ...obj, [val]: 1 };
-              }, {}),
-            }
-          : false,
-        //Get random product
+        //Auto only get 4 fields defined in keyQuery
+        {
+          $project: keyQuery.getList.reduce((obj, val) => {
+            return { ...obj, [val]: 1 };
+          }, {}),
+        },
+        //Get random product, and auto set random number is limit
         query.random ? { $sample: { size: limit } } : false,
-        //Sort
+        //Sort by one of 2 fields are price or name
         query.sort
           ? {
               $sort: {
@@ -110,7 +101,7 @@ const getProductsByFilter = async (req, res) => {
         //Slice
         query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
         query.page ? { $limit: limit } : false,
-        //Remove pipeline does not appear in client request
+        //Remove pipeline does not appear in request
       ].filter(Boolean)
     );
 

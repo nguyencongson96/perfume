@@ -680,3 +680,10 @@
 22:39:18	10-04-2023	12457b50-bcca-4805-be38-ea01767f7d30	GET	undefined	/filter?pricemin=210&priceequal=310
 22:39:25	10-04-2023	3a4938ad-2ba4-4fcd-8513-b0fda11fd722	GET	undefined	/filter?pricemin=210&pricemax=310
 22:39:31	10-04-2023	88d229d0-230a-405a-ad22-99b94f1c1c22	GET	undefined	/filter?pricemin=210&price=310
+22:59:44	10-04-2023	21e422bb-ad92-446c-b456-7e426e73a52f	GET	undefined	/edit/
+22:59:52	10-04-2023	e4ec0b39-a2b0-4de3-b977-45134903073c	GET	undefined	/product/
+22:59:55	10-04-2023	70256603-9bce-4d53-9f67-76f4675c0848	GET	undefined	/products/
+23:01:10	10-04-2023	fc159a2f-fa5c-430c-9336-101a963d8ad0	GET	undefined	/filter?field=name-image-aroma
+23:02:39	10-04-2023	92eddee4-6acf-470c-a4e2-1f38cb32bd5e	GET	undefined	/filter
+23:02:44	10-04-2023	f7c6360d-7c03-4e84-af40-9f36b2963b99	GET	undefined	/filter
+23:02:54	10-04-2023	3e498cf0-ee15-4d68-990c-f705f1485e4c	GET	undefined	/filter?brand=killian
