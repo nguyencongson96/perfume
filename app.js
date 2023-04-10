@@ -27,7 +27,7 @@ dbConnect();
 app.use(logger);
 
 //Handle options credentials check  - before CORS and fetch cookies credentials requirement
-app.use(credentials);
+// app.use(credentials);
 
 //build-in middleware to handle urlencoded data
 app.use(express.urlencoded({ extended: true }));

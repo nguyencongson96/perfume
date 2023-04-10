@@ -18,3 +18,6 @@
 21:10:36	05-04-2023	f93c570d-16d4-407a-8456-d9eaf2299b65	Error: Not allowed by CORS
 21:11:07	05-04-2023	41c5a17a-cc06-4023-a99b-927070c096a1	Error: Not allowed by CORS
 16:20:07	08-04-2023	fcb97d9b-f0e9-459e-86c3-4c085df1c31f	ReferenceError: token is not defined
+15:20:21	10-04-2023	a3144d57-d1f1-4bd3-b248-b5d320e5989a	SyntaxError: Unexpected token o in JSON at position 1
+15:22:16	10-04-2023	5165d670-5030-433d-87eb-94ff7a804eea	SyntaxError: Unexpected token o in JSON at position 1
+15:23:16	10-04-2023	8c7d78b2-6a83-4a80-b882-bc51ae2001f5	SyntaxError: Unexpected token o in JSON at position 1
