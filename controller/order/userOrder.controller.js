@@ -2,8 +2,8 @@ import Orders from "../../model/orders.model.js";
 import Products from "../../model/products.model.js";
 import Users from "../../model/users.model.js";
 import _throw from "../throw.js";
-import keyQuery from "../../config/order/orderKey.config.js";
-import orderStatus from "../../config/order/orderStatus.config.js";
+import keyQuery from "../../config/order/keyQuery.config.js";
+import orderStatus from "../../config/order/status.config.js";
 
 const handleOrderByUser = {
   getOrders: async (req, res) => {
