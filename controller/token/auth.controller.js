@@ -45,11 +45,11 @@ const authController = {
 
       //Add refresh Token to Cookie
       res.cookie("jwt", refreshToken, {
-        httpOnly: true,
+        // httpOnly: true,
         maxAge:
           parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
-        // sameSite: "Lax",
-        // secure: true,
+        sameSite: "Lax",
+        secure: true,
         // signed: true,
       });
 

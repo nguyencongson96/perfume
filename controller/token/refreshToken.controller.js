@@ -5,7 +5,7 @@ import _throw from "../throw.js";
 
 const handleRefreshToken = async (req, res) => {
   try {
-    const { jwt: refreshToken } = req.signedCookies;
+    const { jwt: refreshToken } = req.cookies;
     //Check whether refreshToken apprear in cookies or not
     !refreshToken && _throw(401);
 
