@@ -687,3 +687,14 @@
 23:02:39	10-04-2023	92eddee4-6acf-470c-a4e2-1f38cb32bd5e	GET	undefined	/filter
 23:02:44	10-04-2023	f7c6360d-7c03-4e84-af40-9f36b2963b99	GET	undefined	/filter
 23:02:54	10-04-2023	3e498cf0-ee15-4d68-990c-f705f1485e4c	GET	undefined	/filter?brand=killian
+23:08:40	10-04-2023	d5f35860-8912-4b04-a69e-18e280eaa175	GET	undefined	/filter?brand=killian
+23:08:45	10-04-2023	83f4c791-cd0a-47f3-9ea2-8f1647ddd350	GET	undefined	/filter?brand=killian&sort=pdc
+23:08:49	10-04-2023	aa8c2a4e-d14d-4d39-b11b-afcaaea53cb2	GET	undefined	/filter?brand=killian
+23:08:56	10-04-2023	b5f3e62b-2f2f-45e6-9e8f-9ba45d6a7cd9	GET	undefined	/filter?brand=killian&sort=pdc&random=true
+23:09:00	10-04-2023	08a0c954-2295-448c-b265-6095096fbd19	GET	undefined	/filter?brand=killian&sort=pdc&random=true
+23:09:01	10-04-2023	3513cbf1-16ba-46ed-8014-f46065be8417	GET	undefined	/filter?brand=killian&sort=pdc&random=true
+23:09:04	10-04-2023	5dd0ed00-12aa-41ff-bbb0-958b8328c3bf	GET	undefined	/filter?brand=killian&sort=pdc&type=men
+23:09:07	10-04-2023	71031388-a66f-4b14-a2b6-7b828f0fd9fc	GET	undefined	/filter?sort=pdc&type=men
+23:09:11	10-04-2023	74dd35fe-e6ae-4af2-b994-97dec9363e6d	GET	undefined	/filter?type=men
+23:09:18	10-04-2023	1bcadae5-d503-462c-949f-2a616d880a62	GET	undefined	/filter?type=women
+23:09:23	10-04-2023	e74fbbcd-74b1-4976-9500-b44f32602b07	GET	undefined	/filter?type=unisex
