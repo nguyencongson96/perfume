@@ -33,7 +33,10 @@ app.use(credentials);
 app.use(express.urlencoded({ extended: true }));
 
 //Cross Origin Resource Sharing
-app.use(cors(corsOptions));
+app.use(
+  cors()
+  // corsOptions
+);
 
 //build-in middleware for json
 app.use(express.json());
