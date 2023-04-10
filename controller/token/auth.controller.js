@@ -48,9 +48,9 @@ const authController = {
         httpOnly: true,
         maxAge:
           parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
-        sameSite: "Lax",
-        secure: true,
-        signed: true,
+        // sameSite: "Lax",
+        // secure: true,
+        // signed: true,
       });
 
       //Save token to db
@@ -90,7 +90,7 @@ const authController = {
   },
   logOut: async (req, res) => {
     try {
-      const cookie = req.signedCookies;
+      const cookie = req.cookies;
       //Check whether jwt key exist in cookie
       if (!cookie.jwt) return res.sendStatus(204);
 

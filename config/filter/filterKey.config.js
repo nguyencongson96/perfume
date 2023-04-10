@@ -13,7 +13,6 @@ const keyQuery = {
   uncompare: ["sort", "page", "field", "random"],
   numberCompare: ["stock", "price"],
   includeCompare: ["name"],
-  search: ["name", "sort", "page", "field"],
   filter: [
     "name",
     "sort",

@@ -39,7 +39,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 //middleware for cookies
-app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(cookieParser());
 
 //build-in middleware for static files
 app.use(

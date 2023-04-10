@@ -2,6 +2,7 @@ import Products from "../../model/products.model.js";
 import mergeSort from "./sort.js";
 import Pagination from "../../config/filter/pagination.config.js";
 import keyQuery from "../../config/filter/filterKey.config.js";
+import sortConfig from "../../config/filter/sortStyle.config.js";
 import _throw from "../throw.js";
 
 const { limit } = Pagination;
@@ -33,136 +34,91 @@ const compareSymbol = (arr, key) => {
     });
 };
 
-const getProductsByFilter = {
-  bySearchName: async (req, res) => {
-    try {
-      const query = req.query,
-        keyArr = Object.keys(query);
+const getProductsByFilter = async (req, res) => {
+  try {
+    const query = req.query,
+      queryArr = Object.entries(query),
+      keyArr = Object.keys(query);
 
-      //Check whether req.query has any key-value pairs or not
-      keyArr.length === 0 && _throw(400, "Query Params is required");
+    //Check whether req.query has any key-value pairs or not
+    keyArr.length === 0 && _throw(400, "Query Params is required");
 
-      //Check whether query has any key match allowKey array, if not send status 400
-      !keyArr.every((val) => keyQuery.search.includes(val)) &&
-        _throw(400, "Invalid Query key");
+    //Check whether query has any key match allowKey array, if not send status 400
+    !keyArr.every((val) => keyQuery.filter.includes(val)) &&
+      _throw(400, "Invalid key Query");
 
-      const { name, sort, page, field } = query;
-      //Check whether field query has any value that is not included in allowKey Array
-      const fieldArr = !field ? [] : field.split("-");
+    //Check whether have to filter field or not
+    const fieldArr = !query.field ? [] : query.field.split("-");
+    fieldArr.length > 0 &&
       !fieldArr.every((field) => keyQuery.all.includes(field)) &&
-        _throw(400, "Invalid value of field Query");
+      _throw(400, "Invalid field Query");
 
-      // Find products that match the query object
-      const products = await Products.find(
-        { name: new RegExp(name, "i") },
-        fieldArr.length !== 0 && fieldArr.join(" ")
-      ).exec();
+    //Check sort value
+    const sortVal = query.sort;
+    sortVal &&
+      !Object.values(sortConfig).includes(sortVal) &&
+      _throw(400, "Invalid sort Query");
 
-      // If no products are found, return a 204 status code
-      if (!products || products.length === 0) return res.sendStatus(204);
+    //Check slice value
+    const page = query.page;
+    page && (!Number(page) || page < 1) && _throw(400, "Invalid page Query");
 
-      //Sort
-      const sortedList = !sort ? products : mergeSort(products, sort);
-      !sortedList && _throw(400, "Invalid value of sort Query");
+    // Find products that match the query object
+    const products = await Products.aggregate(
+      [
+        //Add filter
+        {
+          $match: queryArr.reduce((obj, [key, value]) => {
+            !keyQuery.uncompare.includes(key) &&
+              (obj = {
+                ...obj,
+                ...(value.includes("-")
+                  ? { $and: compareSymbol(value.split("-"), key) }
+                  : value.includes(".")
+                  ? { $or: compareSymbol(value.split("."), key) }
+                  : compareSymbol(value.split(), key)[0]),
+              });
+            return obj;
+          }, {}),
+        },
+        //Get specific fields want to get
+        fieldArr.length === 0
+          ? false
+          : {
+              $project: fieldArr.reduce((obj, val) => {
+                return { ...obj, [val]: 1 };
+              }, {}),
+            },
+        //Get random product
+        !query.random ? false : { $sample: { size: limit } },
+        //Sort
+        !sortVal
+          ? false
+          : {
+              $sort: {
+                [sortVal.slice(0, 1) === "p" ? "price" : "name"]:
+                  sortVal.slice(1, 3) === "ac" ? 1 : -1,
+              },
+            },
+      ].filter((pipe) => pipe !== false)
+    );
 
-      //Get product quantity based on page
-      !Number(page) && page && _throw(400, "Invalid value page Query");
-      const pageNum = !page
-          ? Math.ceil(sortedList.length / limit)
-          : Number(page),
-        sliceList = !page
-          ? sortedList
-          : sortedList.slice((pageNum - 1) * limit, pageNum * limit);
+    const sliceList = !page
+      ? products
+      : products.slice((page - 1) * limit, page * limit);
 
-      // Return the total number of products and the products themselves
-      res.status(200).json({
-        total: sliceList.length,
-        page: pageNum,
-        limit,
-        list: sliceList,
-      });
-    } catch (err) {
-      console.log(err);
-      res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error occurred while searching" });
-    }
-  },
-
-  byField: async (req, res) => {
-    try {
-      const query = req.query,
-        queryArr = Object.entries(query),
-        keyArr = Object.keys(query);
-
-      //Check whether req.query has any key-value pairs or not
-      keyArr.length === 0 && _throw(400, "Query Params is required");
-
-      //Check whether query has any key match allowKey array, if not send status 400
-      !keyArr.every((val) => keyQuery.filter.includes(val)) &&
-        _throw(400, "Invalid Query key");
-
-      //Check whether have to filter by finding exact condition
-      const matchObj = queryArr.reduce((obj, [key, value]) => {
-        !keyQuery.uncompare.includes(key) &&
-          (obj = {
-            ...obj,
-            ...(value.includes("-")
-              ? { $and: compareSymbol(value.split("-"), key) }
-              : value.includes(".")
-              ? { $or: compareSymbol(value.split("."), key) }
-              : compareSymbol(value.split(), key)[0]),
-          });
-        return obj;
-      }, {});
-
-      //Check whether have to filter field or not
-      const fieldArr = !query.field ? [] : query.field.split("-");
-      fieldArr.length > 0 &&
-        !fieldArr.every((field) => keyQuery.all.includes(field)) &&
-        _throw(400, "Invalid value of field Query");
-      const fieldObj = fieldArr.reduce((obj, val) => {
-        return { ...obj, [val]: 1 };
-      }, {});
-
-      //Set up filter aggregate pipe line
-      const filterArr = [];
-      filterArr.push({ $match: matchObj });
-      Object.keys(fieldObj).length > 0 &&
-        filterArr.push({ $project: fieldObj });
-      req.query.random && filterArr.push({ $sample: { size: limit } });
-      console.log(filterArr);
-
-      // Find products that match the query object
-      const products = await Products.aggregate(filterArr);
-
-      //Sort
-      const { sort, page } = query;
-      const sortedList = !sort ? products : mergeSort(products, sort);
-      !sortedList && _throw(400, "Invalid value sort Query");
-
-      //Get product quantity based on page
-      !Number(page) && page && _throw(400, "Invalid value page Params");
-      const pageNum = !page
-          ? Math.ceil(sortedList.length / limit)
-          : Number(page),
-        sliceList = !page
-          ? sortedList
-          : sortedList.slice((pageNum - 1) * limit, pageNum * limit);
-
-      res.status(200).json({
-        total: sliceList.length,
-        page: pageNum,
-        limit: Math.min(limit, sliceList.length),
-        list: sliceList,
-      });
-    } catch (err) {
-      console.log(err);
-      res
-        .status(err.status || 500)
-        .json({ msg: err.msg || "Error occurred while filtering" });
-    }
-  },
+    res.status(200).json({
+      total: sliceList.length,
+      page: !page ? "all" : Number(page),
+      limit: !page ? false : Math.min(limit, sliceList.length),
+      list: sliceList,
+    });
+  } catch (err) {
+    console.log(err);
+    res
+      .status(err.status || 500)
+      .json({ msg: err.msg || "Error occurred while filtering" });
+  }
 };
 
 export default getProductsByFilter;
