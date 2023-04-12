@@ -8,6 +8,6 @@ router
   .post("/register", authController.register);
 router
   .use(verifyJWT)
-  .post("/update", authController.update)
+  .put("/update", authController.update)
   .post("/logout", authController.logOut);
 export default router;

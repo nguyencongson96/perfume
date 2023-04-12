@@ -6,18 +6,9 @@ import verifyRoles from "../../middleware/verifyRoles.middleware.js";
 import verifyJWT from "../../middleware/verifyJWT.middleware.js";
 import getDistinctList from "../../controller/product/distinct.js";
 
-const {
-  getAllProduct,
-  addProduct,
-  updateProduct,
-  deleteProduct,
-  getAProduct,
-  test,
-} = productCRUD;
-
 //Route get detail infor of a product
-router.route("/:id").get(getAProduct);
-router.route("/").get(getAllProduct).put(test);
+router.route("/:id").get(productCRUD.getAProduct);
+router.route("/").get(productCRUD.getAllProduct).put(productCRUD.test);
 
 //Route get an array of unique items of a field
 router.route("/distinct/:field").get(getDistinctList);
@@ -26,9 +17,9 @@ router.route("/distinct/:field").get(getDistinctList);
 router.use(verifyJWT, verifyRoles(ROLES_LIST.Admin));
 
 //Route get detail of all products, add a new product, update a product
-router.route("/").post(addProduct).patch(updateProduct);
+router.route("/").post(productCRUD.addProduct).patch(productCRUD.updateProduct);
 
 //Route delete a product
-router.route("/:id").delete(deleteProduct);
+router.route("/:id").delete(productCRUD.deleteProduct);
 
 export default router;
