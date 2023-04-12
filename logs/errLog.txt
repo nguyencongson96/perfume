@@ -21,3 +21,7 @@
 15:20:21	10-04-2023	a3144d57-d1f1-4bd3-b248-b5d320e5989a	SyntaxError: Unexpected token o in JSON at position 1
 15:22:16	10-04-2023	5165d670-5030-433d-87eb-94ff7a804eea	SyntaxError: Unexpected token o in JSON at position 1
 15:23:16	10-04-2023	8c7d78b2-6a83-4a80-b882-bc51ae2001f5	SyntaxError: Unexpected token o in JSON at position 1
+19:50:07	12-04-2023	9b45ca05-d9d9-41dc-8821-18ad143403b4	undefined: Password has not matched
+19:51:02	12-04-2023	36a1f2c2-9adf-4585-ac04-1aa1fcfbb87b	401: Password has not matched
+19:52:26	12-04-2023	4f60ed74-e2a1-4503-aa47-48fdce1a087a	ReferenceError: msg is not defined
+19:52:47	12-04-2023	0dec6646-d596-4306-9444-ae377e9416be	401: Password has not matched

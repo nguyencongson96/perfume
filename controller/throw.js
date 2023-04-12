@@ -1,6 +1,6 @@
-const _throw = (status, msg) => {
-  !msg && (msg = "");
-  throw { status, msg };
+const _throw = (status, message) => {
+  !message && (message = "");
+  throw { status, message };
 };
 
 export default _throw;
