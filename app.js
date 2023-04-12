@@ -8,16 +8,16 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import dbConnect from "./config/dbConnect.config.js";
-import auth from "./routes/auth.route.js";
+import { corsOptions } from "./config/corsOptions.config.js";
+import auth from "./routes/auth/auth.route.js";
 import productCRUD from "./routes/product/productCRUD.route.js";
 import productsFilter from "./routes/product/productFilter.route.js";
 import adminOrder from "./routes/orders/adminOrder.route.js";
 import userOrder from "./routes/orders/userOrder.route.js";
-import refresh from "./routes/refresh.route.js";
+import refresh from "./routes/auth/refresh.route.js";
 import { logger } from "./middleware/logEvents.middleware.js";
 import errHandler from "./middleware/errHandler.middleware.js";
 import credentials from "./middleware/credentials.middleware.js";
-import { corsOptions } from "./config/corsOptions.config.js";
 const PORT = process.env.PORT || 4000;
 
 //Connect to MongoDB
