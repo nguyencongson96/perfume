@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import Users from "../../model/users.model.js";
 import Tokens from "../../model/token.model.js";
 import _throw from "../throw.js";
+import currentTime from "../../config/currentTime.js";
+import userField from "../../config/userField.config.js";
 
 const authController = {
   logIn: async (req, res) => {
@@ -45,12 +47,12 @@ const authController = {
 
       //Add refresh Token to Cookie
       res.cookie("jwt", refreshToken, {
-        // httpOnly: true,
+        httpOnly: true,
         maxAge:
           parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
         sameSite: "Lax",
         secure: true,
-        // signed: true,
+        signed: true,
       });
 
       //Save token to db
@@ -88,25 +90,77 @@ const authController = {
         : res.status(500).send("Error occurred while logging in");
     }
   },
+  update: async (req, res) => {
+    try {
+      const cookie = req.signedCookies;
+      //Check whether jwt key exist in cookie
+      !cookie.jwt && _throw(401);
+      //Check validation of refreshToken get from jwt key
+      const foundToken = await Tokens.findOne({ refreshToken: cookie.jwt });
+      //If token cannot be found, then throw http code 403
+      !foundToken && _throw(403);
+      // Update Token save in db by each key of user
+      const foundUser = await Users.findOne({
+        _id: foundToken.userId,
+        username: req.user,
+      });
+
+      //Update field of user
+      for (const key of userField) {
+        const val = req.body[key];
+        //Only processing update if user send any value
+        val &&
+          //If key is username then find in db to check whether this new val is already existed or not
+          (key === "username" && (await Users.findOne({ username: val }))
+            ? //Throw error if username existed
+              _throw(400, "Username has been registered")
+            : //Throw error if email existed
+            key === "email" && (await Users.findOne({ email: val }))
+            ? _throw(400, "Email has been registered")
+            : //If key is password then encode it and save
+            key === "password"
+            ? (foundUser[key] = await bcrypt.hash(val, 10))
+            : //Otherwise, save it
+              (foundUser[key] = val));
+      }
+
+      //Update time
+      foundUser.lastUpdateAt = currentTime();
+      foundUser.lastActiveAt = currentTime();
+      console.log(foundUser);
+      await foundUser.save();
+      res.status(200).json(`user ${foundUser.username} update successfully`);
+    } catch (err) {
+      console.log(err);
+      err.status
+        ? res.status(err.status).json(err.msg)
+        : res.status(500).send("Error occurred while updating");
+    }
+  },
   logOut: async (req, res) => {
     try {
-      const cookie = req.cookies;
+      const cookie = req.signedCookies;
       //Check whether jwt key exist in cookie
       if (!cookie.jwt) return res.sendStatus(204);
-
       //Check validation of refreshToken get from jwt key
       const refreshToken = cookie.jwt;
-      // Delete Refresh Token
+      // Update Token save in db
       const foundToken = await Tokens.findOneAndUpdate(
         { refreshToken },
         { accessToken: "", refreshToken: "" }
       );
-      !foundToken && _throw(403);
+      //Update user's last active
+      const foundUser = await Users.findByIdAndUpdate(foundToken.userId, {
+        lastActiveAt: currentTime(),
+      });
+      //If user cannot be found, then throw http code 403
+      !foundUser && _throw(403);
 
       //Clear cookie
       res.clearCookie("jwt");
 
-      res.sendStatus(204);
+      //Throw status code 204 if success
+      res.status(200).json("Log out successfully");
     } catch (err) {
       console.log(err);
       err.status
@@ -130,6 +184,7 @@ const authController = {
         email: email,
         phone: phone,
         password: hashedPwd,
+        createAt: currentTime(),
       });
       console.log(result);
       res.status(201).json(`New user ${user} has been created`);

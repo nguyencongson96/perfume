@@ -60,6 +60,9 @@ const orderSchema = new Schema({
     ],
     require: true,
   },
+  createdAt: Date,
+  lastUpdateAt: Date,
+  submitAt: Date,
 });
 
 const orderModel = mongoose.model("Orders", orderSchema);

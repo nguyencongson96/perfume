@@ -39,6 +39,9 @@ const userSchema = new Schema({
     User: { type: Number, default: 0 },
     Admin: { type: Number },
   },
+  createAt: Date,
+  lastActiveAt: Date,
+  lastUpdateAt: Date,
 });
 
 const userModel = mongoose.model("Users", userSchema);

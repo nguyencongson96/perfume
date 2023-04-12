@@ -4,64 +4,12 @@ import Users from "../../model/users.model.js";
 import _throw from "../throw.js";
 import keyQuery from "../../config/order/keyQuery.config.js";
 import orderStatus from "../../config/order/status.config.js";
+import currentTime from "../../config/currentTime.js";
 
 const handleOrderByUser = {
-  getOrders: async (req, res) => {
-    try {
-      //Check user login or not
-      const user = req.user;
-      !user && _throw(401, "Unauthorized");
-
-      // Search for a order with the given id
-      const foundOrders = await Orders.find({
-        userId: (await Users.findOne({ username: user }, { userId: 0 }))._id,
-      }).exec();
-
-      // If there is no order with that id, return a 204 status code with a message saying that there is no cart match id
-      if (foundOrders.length === 0)
-        return res.status(204).json({ msg: `There is no order yet` });
-
-      // Otherwise, return a 200 status code with the found order as a JSON object in the response body
-      return res
-        .status(200)
-        .json({ total: foundOrders.length, list: foundOrders });
-    } catch (err) {
-      console.log(err);
-      err.status
-        ? res.status(err.status).json(err.msg)
-        : req.status(500).json("Error while getting orders");
-    }
-  },
-  getPendingOrder: async (req, res) => {
-    try {
-      //Check if user login or not
-      const user = req.user;
-      !user && _throw(401, "Unauthorized");
-
-      //Find Pending order based on userId and Pending status
-      const foundOrder = await Orders.findOne({
-        userId: (await Users.findOne({ username: user }))._id,
-        status: "Pending",
-      }).exec();
-
-      //If there is no Pending order, send status code 204
-      if (!foundOrder)
-        return res.status(204).json({ msg: `Cannot find Order` });
-      else return res.status(200).json(foundOrder);
-    } catch (err) {
-      console.log(err);
-      err.status
-        ? res.status(err.status).json(err.msg)
-        : req.status(500).json("Error while getting pending order");
-    }
-  },
   getOneOrder: async (req, res) => {
     try {
       const { id } = req.params;
-
-      //Check user login or not
-      const user = req.user;
-      !user && _throw(401, "Unauthorized");
 
       //Find order based on id params
       const foundOrder = await Orders.findById(id);
@@ -69,7 +17,7 @@ const handleOrderByUser = {
         return res.status(204).json({ msg: `Cannot find Order` });
 
       //Throw error if cannot find user
-      const foundUser = await Users.findOne({ username: user }).exec();
+      const foundUser = await Users.findOne({ username: req.user }).exec();
       const userId = foundUser._id;
       userId.toString() !== foundOrder.userId.toString() &&
         _throw(401, "Permission is not granted");
@@ -84,38 +32,42 @@ const handleOrderByUser = {
   },
   addNewOrder: async (req, res) => {
     try {
-      const { status, cart, name, address } = req.body;
-      let { phone } = req.body;
+      const { status, cart, name, address, phone } = req.body;
 
       //Check whether cart is an array or not
-      !Array.isArray(cart) && _throw(400, "Invalid cart");
+      !Array.isArray(cart)
+        ? _throw(400, "Invalid cart")
+        : cart.length === 0 && _throw(400, "Cannot submit blank cart");
 
       //Check whether staus valid or not
       !orderStatus.updatebyUser.includes(status) &&
         _throw(400, "Invalid status");
 
-      //In case user is not login, create random userId and if user do not give phone number, throw error
-      let userId = "";
-      if (!req.user) {
-        userId = await new mongoose.Types.ObjectId().toString();
-        !phone && _throw(400, "Require phone when user is not login");
-        status !== "Dispatched" && _throw(400, "Invalid status when not login");
+      //In case user logins, get userId of the user, otherwise, create a new one
+      const userId = (
+        !req.user
+          ? await new mongoose.Types.ObjectId()
+          : (await Users.findOne({ username: req.user }))._id
+      ).toString();
 
-        //In case user is login, throw error if user try to add another Pending Order when they already have one, or user did not add address info
-      } else {
-        userId = (await Users.findOne({ username: req.user }))._id.toString();
-        !phone && (phone = foundUser.phone);
-        status === "Pending"
-          ? (await Orders.findOne({ userId, status: "Pending" })) &&
+      //Check whether user try to add new pending order or not
+      status === "Pending"
+        ? !req.user
+          ? //In case user does not login, throw error if user try to add order with status Pending
+            _throw(400, "Invalid status when not login")
+          : //In case user logins, throw error if user try to add another Pending Order when they already have one
+            (await Orders.findOne({ userId, status: "Pending" })) &&
             _throw(400, "An user have only one Pending Order")
-          : (!address || !name) && _throw(400, "Address, Name required");
-      }
+        : //Check whether all necessary field is filled or not when order status is not pending
+          keyQuery.add.forEach(
+            (field) => !field && _throw(400, `Require ${field}`)
+          );
 
       //Update cart in order
       let total = 0;
       for (const item of cart) {
         const { productId, quantity, capacity } = item;
-        let { price } = item;
+
         // Check if there is a product matching the productId in the database
         const foundProduct = await Products.findById(productId);
         if (!foundProduct) _throw(400, `No product matches id ${productId}`);
@@ -127,7 +79,7 @@ const handleOrderByUser = {
         capacityIndex < 0 && _throw(400, `Invalid capacity`);
 
         //Get price
-        price = foundProduct.price[capacityIndex];
+        item.price = foundProduct.price[capacityIndex];
 
         //Get quantity and save
         let { name, stock } = foundProduct;
@@ -136,7 +88,7 @@ const handleOrderByUser = {
         await foundProduct.save();
 
         //Set total
-        total += quantity * price;
+        total += quantity * item.price;
       }
 
       // Create a new order and return it as JSON data
@@ -148,6 +100,11 @@ const handleOrderByUser = {
         status,
         total,
         cart,
+        createdAt: currentTime(),
+        ...(status !== "Pending" && {
+          lastUpdateAt: currentTime(),
+          submitAt: currentTime(),
+        }),
       });
       return res.status(201).json(newCart);
     } catch (err) {
@@ -164,9 +121,52 @@ const handleOrderByUser = {
         : res.status(500).send("Error occurred while adding new order");
     }
   },
+  getOrders: async (req, res) => {
+    try {
+      // Search for a order with the given id
+      const foundOrders = await Orders.find({
+        userId: (
+          await Users.findOne({ username: req.user }, { userId: 0 })
+        )._id,
+      }).exec();
+
+      return foundOrders.length === 0
+        ? res.status(204).json({ msg: `There is no order yet` }) // If there's no order has matched username, return a 204 status code with a message saying that there is no cart matched
+        : res
+            .status(200)
+            .json({ total: foundOrders.length, list: foundOrders }); // Otherwise, return a 200 status code with the found order as a JSON object in the response body
+    } catch (err) {
+      console.log(err);
+      err.status
+        ? res.status(err.status).json(err.msg)
+        : req.status(500).json("Error while getting orders");
+    }
+  },
+  getPendingOrder: async (req, res) => {
+    try {
+      //Find Pending order based on userId and Pending status
+      const foundOrder = await Orders.findOne(
+        {
+          userId: (await Users.findOne({ username: req.user }))._id,
+          status: "Pending",
+        },
+        { userId: 0 }
+      ).exec();
+
+      //If there is no Pending order, send status code 204
+      return !foundOrder
+        ? res.status(204).json({ msg: `Cannot find Order` })
+        : res.status(200).json(foundOrder);
+    } catch (err) {
+      console.log(err);
+      err.status
+        ? res.status(err.status).json(err.msg)
+        : req.status(500).json("Error while getting pending order");
+    }
+  },
   updateOrder: async (req, res) => {
     try {
-      const { status, cart, name, phone, address } = req.body;
+      const { status, cart } = req.body;
 
       //Check if status valid or not
       status &&
@@ -174,26 +174,25 @@ const handleOrderByUser = {
         _throw(400, "Invalid Status");
 
       //Check whether cart is an array or not
-      !Array.isArray(cart) && _throw(400, "Invalid cart");
-
-      //Check if user login or not
-      const user = req.user;
-      !user && _throw(401, "Unauthorized");
+      !Array.isArray(cart)
+        ? _throw(400, "Invalid cart")
+        : cart.length === 0 && _throw(400, "Cannot update to blank cart");
 
       //Find Pending Order
       const foundOrder = await Orders.findOne({
-        userId: (await Users.findOne({ username: user }))._id,
+        userId: (await Users.findOne({ username: req.user }))._id,
         status: "Pending",
       });
       if (!foundOrder)
         return res.status(204).json({ msg: `Cannot find an Pending Order` });
 
-      //In case user update order status to Dispatched, address is required
-      if (status !== "Pending") {
-        !address && _throw(400, "Address required");
-        !name && _throw(400, "Name required");
-        !phone && _throw(400, "Phone required");
-      }
+      //In case user update order status to Dispatched, address, name, phone, status is required. Throw error if lacking one of them, else, update all
+      keyQuery.update.forEach((key) => {
+        const value = req.body[key];
+        value
+          ? (foundOrder[key] = value)
+          : status !== "Pending" && _throw(400, `Require ${key}`);
+      });
 
       //Reinstall products in order
       foundOrder.cart = [];
@@ -214,8 +213,10 @@ const handleOrderByUser = {
 
         //Update stock
         let stock = foundProduct.stock[capacityIndex];
+        //Throw error if stock does not have enough product for the order
         stock < quantity &&
           _throw(400, `Not enough stock of ${foundProduct.name}`);
+        //If status is not pending then minus quantity in stock
         status !== "Pending" && (stock -= quantity);
 
         //Push product to order, calculate total price of order, and only minus stock if status is no longer Pending
@@ -223,11 +224,9 @@ const handleOrderByUser = {
         foundOrder.total += quantity * price;
       }
 
-      // Save the updated order
-      keyQuery.update.forEach((key) => {
-        const value = req.body[key];
-        value && (foundOrder[key] = value);
-      });
+      //Update time
+      foundOrder.lastUpdateAt = currentTime();
+      status !== "Pending" && (foundOrder.submitAt = currentTime());
 
       // Return the updated order
       const updateCart = await foundOrder.save();
@@ -248,13 +247,9 @@ const handleOrderByUser = {
   },
   deleteOrder: async (req, res) => {
     try {
-      //Check user login or not
-      const user = req.user;
-      !user && _throw(401, "Unauthorized");
-
       //Find and delete order of logged in user in pending state
       const foundOrder = await Orders.findOneAndDelete({
-        userId: (await Users.findOne({ username: user }))._id,
+        userId: (await Users.findOne({ username: req.user }))._id,
         status: "Pending",
       }).exec();
 
