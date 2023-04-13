@@ -120,21 +120,26 @@ const authController = {
   }),
   logOut: asyncWrapper(async (req, res) => {
     const cookie = req.signedCookies;
+
     //Check whether jwt key exist in cookie
     if (!cookie.jwt) return res.sendStatus(204);
+
     //Check validation of refreshToken get from jwt key
     const refreshToken = cookie.jwt;
+
     // Update Token save in db
     const foundToken = await Tokens.findOneAndUpdate(
       { refreshToken },
       { accessToken: "", refreshToken: "" }
     );
+
+    //If user cannot be found, then throw http code 403
+    !foundToken && _throw(403);
+
     //Update user's last active
-    const foundUser = await Users.findByIdAndUpdate(foundToken.userId, {
+    await Users.findByIdAndUpdate(foundToken.userId, {
       lastActiveAt: currentTime(),
     });
-    //If user cannot be found, then throw http code 403
-    !foundUser && _throw(403);
 
     //Clear cookie
     res.clearCookie("jwt");
