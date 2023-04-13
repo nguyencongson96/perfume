@@ -1,4 +1,4 @@
-import _throw from "../controller/throw";
+import _throw from "../controller/throw.js";
 
 const verifyRoles = (...allowedRoles) => {
   return (req, res, next) => {

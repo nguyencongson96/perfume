@@ -39,12 +39,8 @@ app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 //build-in middleware for static files
-app.use(
-  "/",
-  express.static(
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "public")
-  )
-);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.use("/", express.static(path.join(__dirname, "public")));
 
 //Routes
 app.use("/auth", auth);
