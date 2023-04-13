@@ -16,16 +16,12 @@ import distinct from "./routes/product/distinct.route.js";
 import adminOrder from "./routes/orders/adminOrder.route.js";
 import userOrder from "./routes/orders/userOrder.route.js";
 import refresh from "./routes/auth/refresh.route.js";
-import { logger } from "./middleware/logEvents.middleware.js";
 import errHandler from "./middleware/errHandler.middleware.js";
 import credentials from "./middleware/credentials.middleware.js";
 const PORT = process.env.PORT || 4000;
 
 //Connect to MongoDB
 dbConnect();
-
-//Custom middleware logger
-app.use(logger);
 
 //Handle options credentials check  - before CORS and fetch cookies credentials requirement
 app.use(credentials);

@@ -108,7 +108,7 @@ const productCRUD = {
 
     // If no product is found with the given id, return a 204 status code
     !foundProduct
-      ? res.status(204).json(`There is no product matched ID ${id}`)
+      ? _throw(404, `There is no product matched ID ${id}`)
       : res.status(200).json(foundProduct); // Return the found product with a status of 200
   }),
   test: async (req, res) => {

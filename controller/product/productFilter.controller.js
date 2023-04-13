@@ -29,11 +29,11 @@ const convertMatchCond = (arr, key) => {
       key.includes(compare)
     );
     return foundCompare
-      ? arr.map((item) => ({
-          [key.replace(foundCompare, "")]: {
-            [compareSymbol[foundCompare]]: Number(item),
-          },
-        })) // Return an array of objects with the comparison symbol and number if a comparison symbol was found
+      ? arr.map((item) => {
+          const newkey = key.replace(foundCompare, ""),
+            operatorMap = compareSymbol[foundCompare];
+          return { [newkey]: { [operatorMap]: Number(item) } };
+        }) // Return an array of objects with the comparison symbol and number if a comparison symbol was found
       : arr.map((item) => ({ [key]: { $eq: Number(item) } })); // Return an array of objects with a number that is equal to the item
   }
   // If the key does not contain a number comparison symbol
@@ -101,15 +101,15 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
         : false,
       //Slice
       query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
-      query.page ? { $limit: limit } : false,
+      { $limit: limit },
       //Remove pipeline does not appear in request
     ].filter(Boolean)
   );
 
   res.status(200).json({
     total: products.length,
-    ...(query.page && { page: Number(query.page) }),
-    ...(query.page && { limit: Math.min(limit, products.length) }),
+    page: Number(query.page) || 1,
+    limit: Math.min(limit, products.length),
     list: products,
   });
 });

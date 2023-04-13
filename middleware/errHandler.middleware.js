@@ -1,7 +1,4 @@
-import { logEvents } from "./logEvents.middleware.js";
-
 const errHandler = (err, req, res, next) => {
-  logEvents(`${err.status || err.name}: ${err.message}`, "errLog.txt");
   console.log(err.stack);
   return err.name === "ValidationError"
     ? res.status(400).json(
