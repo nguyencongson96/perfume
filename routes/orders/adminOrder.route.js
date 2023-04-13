@@ -3,7 +3,7 @@ const router = express.Router();
 import handleOrderByAdmin from "../../controller/order/adminOrder.controller.js";
 import verifyJWT from "../../middleware/verifyJWT.middleware.js";
 import verifyRoles from "../../middleware/verifyRoles.middleware.js";
-import ROLES_LIST from "../../config/rolesList.config.js";
+import ROLES_LIST from "../../config/auth/rolesList.config.js";
 
 router.use(verifyJWT, verifyRoles(ROLES_LIST.Admin));
 

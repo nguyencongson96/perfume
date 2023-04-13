@@ -3,12 +3,14 @@ const router = express.Router();
 import handleOrderByUser from "../../controller/order/userOrder.controller.js";
 import verifyJWT from "../../middleware/verifyJWT.middleware.js";
 import verifyRoles from "../../middleware/verifyRoles.middleware.js";
-import ROLES_LIST from "../../config/rolesList.config.js";
+import ROLES_LIST from "../../config/auth/rolesList.config.js";
 
+router.use(verifyJWT);
 //Route add new order could be processed by any user even not login
 router.route("/").post(handleOrderByUser.addNewOrder);
 
-router.use(verifyJWT, verifyRoles(ROLES_LIST.User));
+//Verify whether user logged in or not
+router.use(verifyRoles(ROLES_LIST.User));
 
 //Route get pending order of user logged in
 router.route("/pending").get(handleOrderByUser.getPendingOrder);

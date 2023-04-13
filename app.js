@@ -12,6 +12,7 @@ import { corsOptions } from "./config/corsOptions.config.js";
 import auth from "./routes/auth/auth.route.js";
 import productCRUD from "./routes/product/productCRUD.route.js";
 import productsFilter from "./routes/product/productFilter.route.js";
+import distinct from "./routes/product/distinct.route.js";
 import adminOrder from "./routes/orders/adminOrder.route.js";
 import userOrder from "./routes/orders/userOrder.route.js";
 import refresh from "./routes/auth/refresh.route.js";
@@ -53,6 +54,7 @@ app.use(
 app.use("/auth", auth);
 app.use("/refresh", refresh);
 app.use("/products", productCRUD);
+app.use("/distinct", distinct);
 app.use("/filter", productsFilter);
 app.use("/order/admin", adminOrder);
 app.use("/order/user", userOrder);

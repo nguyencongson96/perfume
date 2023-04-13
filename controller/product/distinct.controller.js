@@ -2,6 +2,7 @@ import Products from "../../model/products.model.js";
 import keyQuery from "../../config/product/keyQuery.config.js";
 import _throw from "../throw.js";
 import asyncWrapper from "../../middleware/async.middleware.js";
+import { isString } from "../checkType.js";
 
 const distinctKey = keyQuery.distinct;
 
@@ -13,7 +14,7 @@ const getDistinctList = asyncWrapper(async (req, res) => {
   !field && _throw(400, "Param is required");
 
   // If the "field" parameter exists but is not a string or contains invalid elements, throw an error with status code 400 and message "Invalid Param"
-  typeof field !== "string" && _throw(400, "Invalid Param");
+  !isString(field) && _throw(400, "Invalid Param");
 
   // Send all promise at once to get the distinct item and get return as array of array
   const fieldArr = field.split("-"),
@@ -25,9 +26,9 @@ const getDistinctList = asyncWrapper(async (req, res) => {
     );
 
   //Convert array of array to obj of array
-  const result = uniqueArr.reduce((obj, unique, index) => {
-    const newField = { [fieldArr[index]]: unique };
-    return { ...obj, ...newField };
+  const result = uniqueArr.reduce((obj, list, index) => {
+    const field = fieldArr[index];
+    return { ...obj, ...{ [field]: list } };
   }, {});
 
   // Send a JSON response with status code 200 containing the "result" object

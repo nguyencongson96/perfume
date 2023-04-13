@@ -4,7 +4,7 @@ import Users from "../../model/users.model.js";
 import Tokens from "../../model/token.model.js";
 import _throw from "../throw.js";
 import currentTime from "../../config/currentTime.js";
-import userField from "../../config/userField.config.js";
+import userField from "../../config/auth/userField.config.js";
 import asyncWrapper from "../../middleware/async.middleware.js";
 
 const authController = {
@@ -12,7 +12,8 @@ const authController = {
     const { user, password } = req.body;
 
     //Input validation
-    (!user || !password) && _throw(400, "Invalid username or password");
+    !user && _throw(400, "username is required");
+    !password && _throw(400, "password is required");
 
     const foundUser = await Users.findOne({ username: user }).exec();
     !foundUser && _throw(401, "User not found");

@@ -1,11 +1,13 @@
+import mongoose from "mongoose";
 import Orders from "../../model/orders.model.js";
-import Products from "../../model/products.model.js";
 import Users from "../../model/users.model.js";
 import _throw from "../throw.js";
 import keyQuery from "../../config/order/keyQuery.config.js";
 import orderStatus from "../../config/order/status.config.js";
 import currentTime from "../../config/currentTime.js";
 import asyncWrapper from "../../middleware/async.middleware.js";
+import updateCart from "./updateCart.js";
+import { isArray, isEmpty } from "../checkType.js";
 
 const handleOrderByUser = {
   getOneOrder: asyncWrapper(async (req, res) => {
@@ -13,7 +15,7 @@ const handleOrderByUser = {
 
     //Find order based on id params
     const foundOrder = await Orders.findById(id);
-    if (!foundOrder) return res.status(204).json({ msg: `Cannot find Order` });
+    if (!foundOrder) return res.status(204).json(`Cannot find Order`);
 
     //Throw error if cannot find user
     const foundUser = await Users.findOne({ username: req.user }).exec();
@@ -27,9 +29,9 @@ const handleOrderByUser = {
     const { status, cart, name, address, phone } = req.body;
 
     //Check whether cart is an array or not
-    !Array.isArray(cart)
+    !isArray(cart)
       ? _throw(400, "Invalid cart")
-      : cart.length === 0 && _throw(400, "Cannot submit blank cart");
+      : isEmpty(cart) && _throw(400, "Cannot submit blank cart");
 
     //Check whether staus valid or not
     !orderStatus.updatebyUser.includes(status) && _throw(400, "Invalid status");
@@ -55,49 +57,24 @@ const handleOrderByUser = {
         );
 
     //Update cart in order
-    let total = 0;
-    for (const item of cart) {
-      const { productId, quantity, capacity } = item;
-
-      // Check if there is a product matching the productId in the database
-      const foundProduct = await Products.findById(productId);
-      if (!foundProduct) _throw(400, `No product matches id ${productId}`);
-
-      //Find position of capacity in array
-      const capacityIndex = foundProduct.capacity.findIndex(
-        (i) => i === Number(capacity)
-      );
-      capacityIndex < 0 && _throw(400, `Invalid capacity`);
-
-      //Get price
-      item.price = foundProduct.price[capacityIndex];
-
-      //Get quantity and save
-      let { name, stock } = foundProduct;
-      quantity > stock && _throw(400, `Not enough stock of ${name}`);
-      status !== "Pending" && (stock[capacityIndex] -= quantity);
-      await foundProduct.save();
-
-      //Set total
-      total += quantity * item.price;
-    }
+    const { total, cart: newCart } = await updateCart(status, cart);
 
     // Create a new order and return it as JSON data
-    const newCart = await Orders.create({
+    const createdCart = await Orders.create({
       userId,
       name,
       phone,
       address,
       status,
       total,
-      cart,
+      cart: newCart,
       createdAt: currentTime(),
       ...(status !== "Pending" && {
         lastUpdateAt: currentTime(),
         submitAt: currentTime(),
       }),
     });
-    return res.status(201).json(newCart);
+    return res.status(201).json(createdCart);
   }),
   getOrders: asyncWrapper(async (req, res) => {
     // Search for a order with the given id
@@ -106,7 +83,7 @@ const handleOrderByUser = {
     }).exec();
 
     return foundOrders.length === 0
-      ? res.status(204).json({ msg: `There is no order yet` }) // If there's no order has matched username, return a 204 status code with a message saying that there is no cart matched
+      ? res.status(204).json(`There is no order yet`) // If there's no order has matched username, return a 204 status code with a message saying that there is no cart matched
       : res.status(200).json({ total: foundOrders.length, list: foundOrders }); // Otherwise, return a 200 status code with the found order as a JSON object in the response body
   }),
   getPendingOrder: asyncWrapper(async (req, res) => {
@@ -121,7 +98,7 @@ const handleOrderByUser = {
 
     //If there is no Pending order, send status code 204
     return !foundOrder
-      ? res.status(204).json({ msg: `Cannot find Order` })
+      ? res.status(204).json(`User does not have any pending order`)
       : res.status(200).json(foundOrder);
   }),
   updateOrder: asyncWrapper(async (req, res) => {
@@ -133,9 +110,9 @@ const handleOrderByUser = {
       _throw(400, "Invalid Status");
 
     //Check whether cart is an array or not
-    !Array.isArray(cart)
+    !isArray(cart)
       ? _throw(400, "Invalid cart")
-      : cart.length === 0 && _throw(400, "Cannot update to blank cart");
+      : isEmpty(cart) && _throw(400, "Cannot update to blank cart");
 
     //Find Pending Order
     const foundOrder = await Orders.findOne({
@@ -143,49 +120,28 @@ const handleOrderByUser = {
       status: "Pending",
     });
     if (!foundOrder)
-      return res.status(204).json({ msg: `Cannot find an Pending Order` });
+      return res.status(204).json(`Cannot find an Pending Order`);
 
+    //In case user update order but status still is pending
+    if (status === "Pending")
+      keyQuery.update.forEach((key) => {
+        const value = req.body[key];
+        value && (foundOrder[key] = value);
+      });
     //In case user update order status to Dispatched, address, name, phone, status is required. Throw error if lacking one of them, else, update all
-    keyQuery.update.forEach((key) => {
-      const value = req.body[key];
-      value
-        ? (foundOrder[key] = value)
-        : status !== "Pending" && _throw(400, `Require ${key}`);
-    });
-
-    //Reinstall products in order
-    foundOrder.cart = [];
-    foundOrder.total = 0;
-    for (const { productId, quantity, capacity } of cart) {
-      //Find product
-      const foundProduct = await Products.findById(productId);
-      !foundProduct && _throw(400, `No product matches id ${productId}`);
-
-      //Find position of capacity in array
-      const capacityIndex = foundProduct.capacity.findIndex(
-        (ele) => ele === capacity
-      );
-      capacityIndex < 0 && _throw(400, `Invalid capacity`);
-
-      //Update price
-      const price = foundProduct.price[capacityIndex];
-
-      //Update stock
-      let stock = foundProduct.stock[capacityIndex];
-      //Throw error if stock does not have enough product for the order
-      stock < quantity &&
-        _throw(400, `Not enough stock of ${foundProduct.name}`);
-      //If status is not pending then minus quantity in stock
-      status !== "Pending" && (stock -= quantity);
-
-      //Push product to order, calculate total price of order, and only minus stock if status is no longer Pending
-      foundOrder.cart.push({ productId, quantity, capacity, price });
-      foundOrder.total += quantity * price;
+    else {
+      keyQuery.update.forEach((key) => {
+        const value = req.body[key];
+        value ? (foundOrder[key] = value) : _throw(400, `Require ${key}`);
+      });
+      foundOrder.submitAt = currentTime();
     }
 
-    //Update time
+    //Update Order
+    const { total, cart: newCart } = await updateCart(status, cart);
+    foundOrder.cart = newCart;
+    foundOrder.total = total;
     foundOrder.lastUpdateAt = currentTime();
-    status !== "Pending" && (foundOrder.submitAt = currentTime());
 
     // Return the updated order
     const updateCart = await foundOrder.save();

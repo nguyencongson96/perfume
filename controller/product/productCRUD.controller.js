@@ -3,7 +3,7 @@ import Pagination from "../../config/product/pagination.config.js";
 import keyQuery from "../../config/product/keyQuery.config.js";
 import asyncWrapper from "../../middleware/async.middleware.js";
 import _throw from "../throw.js";
-import isObj from "../checkObj.js";
+import { isArray, isEmpty, isObject, isString } from "../checkType.js";
 
 const { limit } = Pagination;
 
@@ -23,15 +23,20 @@ const productCRUD = {
     const product = req.body;
 
     //Check if body is not object, in case it is an object, whether it is an array or not
-    isObj(product) && _throw(400, "Invalid input body");
+    !isObject(product) && _throw(400, "Invalid input body");
 
-    // Check if all fields are required
-    Object.values(product).every((ele) => {
-      (typeof ele === "object"
-        ? Object.keys(ele).length === 0
-        : ele.toString().length === 0) &&
-        _throw(400, "All fields are required");
-    });
+    // Check validation of each field value
+    for (const key of Object.keys(product)) {
+      const type = Products.schema.path(key).instance.toLowerCase();
+      const value = product[key];
+      if (
+        (type === "string" && !isString(value)) ||
+        (type === "array" && !isArray(value)) ||
+        isObject(value)
+      )
+        _throw(400, `Invalid value of field ${key}`);
+      isEmpty(value) && _throw(400, "All fields are required");
+    }
 
     // Create a new product using the create() method of the Products object
     const newProduct = await Products.create(product);
@@ -44,7 +49,7 @@ const productCRUD = {
     const { id, ...rest } = req.body;
 
     //Check if the rest is not object, in case it is an object, whether it is an array or not
-    isObj(rest) && _throw(400, "Invalid input body");
+    isObject(rest) && _throw(400, "Invalid input body");
 
     // Check if id is present in the request body
     !id && _throw(400, "ID is required");
@@ -54,17 +59,21 @@ const productCRUD = {
 
     // If no product is found with the given id, return a 204 status code
     if (!foundProduct)
-      return res
-        .status(204)
-        .json({ msg: `There is no product match ID ${id}` });
+      return res.status(204).json(`There is no product match ID ${id}`);
 
     // Update the fields of the found product with the fields from the request body
-    Object.keys(rest).forEach((key) => {
+    for (const key of Object.keys(rest)) {
       const value = rest[key];
-      isObj(value)
-        ? Object.keys(value).length > 0 && (foundProduct[key] = value)
-        : value.length > 0 && (foundProduct[key] = value);
-    });
+      const type = Products.schema.path(key).instance.toLowerCase();
+      if (
+        (type === "string" && !isString(value)) ||
+        (type === "array" && !isArray(value)) ||
+        isObject(value)
+      )
+        _throw(400, `Invalid value of field ${key}`);
+      else if (isEmpty(value)) _throw(400, `Fields ${key} is required`);
+      else foundProduct[key] = value;
+    }
 
     // Save the updated product to the database
     await foundProduct.save();
@@ -84,8 +93,8 @@ const productCRUD = {
 
     // If no product is found with the given id, return a 204 status code
     !deleteProduct
-      ? res.status(204).json({ msg: `There is no product match ID ${id}` })
-      : res.status(200).json({ msg: `Product ID ${id} has been deleted` }); // Return a success message with a status of 200
+      ? res.status(204).json(`There is no product match ID ${id}`)
+      : res.status(200).json(`Product ID ${id} has been deleted`); // Return a success message with a status of 200
   }),
   getAProduct: asyncWrapper(async (req, res) => {
     // Extract the id from the request parameters
@@ -99,7 +108,7 @@ const productCRUD = {
 
     // If no product is found with the given id, return a 204 status code
     !foundProduct
-      ? res.status(204).json({ msg: `There is no product matched ID ${id}` })
+      ? res.status(204).json(`There is no product matched ID ${id}`)
       : res.status(200).json(foundProduct); // Return the found product with a status of 200
   }),
   test: async (req, res) => {

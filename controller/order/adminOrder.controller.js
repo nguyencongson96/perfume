@@ -4,6 +4,7 @@ import _throw from "../throw.js";
 import keyQuery from "../../config/order/keyQuery.config.js";
 import orderStatus from "../../config/order/status.config.js";
 import asyncWrapper from "../../middleware/async.middleware.js";
+import { isString } from "../checkType.js";
 
 const handleOrderByAdmin = {
   getOrders: asyncWrapper(async (req, res) => {
@@ -34,7 +35,7 @@ const handleOrderByAdmin = {
 
     // Throw error if id value is invalid
     !id && _throw(400, "Id is required");
-    typeof id !== "string" && _throw(400, "Invalid Id");
+    isString(id) && _throw(400, "Invalid Id");
 
     //Throw error if status value is invalid
     status &&
@@ -43,7 +44,7 @@ const handleOrderByAdmin = {
 
     //Response 204 if cannot find the order
     const foundOrder = await Orders.findById(id);
-    if (!foundOrder) return res.status(204).json({ msg: `Cannot find Order` });
+    if (!foundOrder) return res.status(204).json(`Cannot find Order`);
 
     //Check for each case of former status
     if (foundOrder.status === "Cancelled")
@@ -68,8 +69,8 @@ const handleOrderByAdmin = {
     });
 
     // Return the updated order
-    const updateCart = await foundOrder.save();
-    return res.status(200).json(updateCart);
+    const updateOrder = await foundOrder.save();
+    return res.status(200).json(updateOrder);
   }),
 };
 

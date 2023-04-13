@@ -25,3 +25,16 @@
 19:51:02	12-04-2023	36a1f2c2-9adf-4585-ac04-1aa1fcfbb87b	401: Password has not matched
 19:52:26	12-04-2023	4f60ed74-e2a1-4503-aa47-48fdce1a087a	ReferenceError: msg is not defined
 19:52:47	12-04-2023	0dec6646-d596-4306-9444-ae377e9416be	401: Password has not matched
+21:42:17	12-04-2023	8f40a9b5-b0d7-4825-9308-3ecdd880ef2c	400: Invalid key Query
+22:05:58	12-04-2023	29c88185-0d77-4eac-b127-4ca6204540b5	401: Password has not matched
+22:06:13	12-04-2023	2bd3802f-c893-412f-8c42-51cfb8970917	ReferenceError: mongoose is not defined
+22:07:05	12-04-2023	fcc91469-e961-40db-a189-7463ba37905c	400: Invalid status when not login
+10:24:58	13-04-2023	9f0495ca-58e6-4065-9940-5718b73ca8ed	TypeError: Cannot read properties of undefined (reading 'split')
+10:52:11	13-04-2023	fae8ff18-f287-4697-9209-f1eff4de2955	400: Invalid input body
+10:52:53	13-04-2023	f3ea8c05-497a-4749-9ae8-b1c08d7b33dd	TypeError: Products.path is not a function
+10:54:27	13-04-2023	270bb8f8-8cb2-41ec-a41b-91b7defff94c	TypeError: Products.paths is not a function
+10:55:30	13-04-2023	448c3c16-7445-4018-ac5f-250ebe8c1b03	400: All fields are required
+10:57:19	13-04-2023	4b09b2b1-3a15-4667-8cb3-0ab8aec43047	400: All fields are required
+10:58:48	13-04-2023	17274a61-d6c1-4a34-b922-f4f674bc0eb8	TypeError: Products.schema.paths is not a function
+10:59:04	13-04-2023	2637fcfe-04fd-4cba-9680-c024a7b712bb	400: All fields are required
+10:59:25	13-04-2023	0371578b-065a-47cd-bade-727ecc7b0e8b	400: All fields are required
