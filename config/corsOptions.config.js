@@ -1,8 +1,4 @@
-const whiteList = [
-  "https://perfume-frontend.onrender.com",
-  "http://localhost:3000",
-  "http://localhost:4000",
-];
+const whiteList = ["http://localhost:3000", "http://localhost:4000"];
 
 const corsOptions = {
   origin: function (origin, callback) {
