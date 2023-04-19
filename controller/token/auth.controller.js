@@ -11,21 +11,15 @@ const authController = {
   logIn: asyncWrapper(async (req, res) => {
     const { user, password } = req.body;
 
-    //Input validation
-    !user && _throw(400, "username is required");
-    !password && _throw(400, "password is required");
-
     const foundUser = await Users.findOne({ username: user }).exec();
-    !foundUser && _throw(401, "User not found");
+    !foundUser && _throw(404, "User not found");
 
     // Evaluate password
     const match = await bcrypt.compare(password, foundUser.password);
     !match && _throw(401, "Password has not matched");
 
     //Create JWTs
-    const foundRoles = Object.values(foundUser.roles).filter(
-      (role) => role !== undefined
-    );
+    const foundRoles = Object.values(foundUser.roles).filter((role) => role !== undefined);
 
     //Generate new accessToken
     const accessToken = jwt.sign(
@@ -40,36 +34,25 @@ const authController = {
     );
 
     //Generate new refreshToken
-    const refreshToken = jwt.sign(
-      { username: foundUser.username },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
-    );
+    const refreshToken = jwt.sign({ username: foundUser.username }, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
+    });
 
     //Add refresh Token to Cookie
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
-      maxAge:
-        parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
+      maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
       sameSite: "Lax",
       secure: true,
       signed: true,
     });
 
     //Save token to db
-    const foundToken = await Tokens.findOne({ userId: foundUser._id });
-    if (!foundToken) {
-      const newTokenUser = await Tokens.create({
-        userId: foundUser._id,
-        accessToken,
-        refreshToken,
-      });
-      console.log(newTokenUser);
-    } else {
-      foundToken.accessToken = accessToken;
-      foundToken.refreshToken = refreshToken;
-      await foundToken.save();
-    }
+    await Tokens.findOneAndUpdate(
+      { userId: foundUser._id },
+      { userId: foundUser._id, accessToken, refreshToken },
+      { runValidators: true, upsert: true, new: true }
+    );
 
     //Send accessToken to frontend
     res.json({
@@ -79,7 +62,8 @@ const authController = {
     });
   }),
   update: asyncWrapper(async (req, res) => {
-    const cookie = req.signedCookies;
+    const cookie = req.signedCookies,
+      time = currentTime();
     //Check whether jwt key exist in cookie
     !cookie.jwt && _throw(401);
     //Check validation of refreshToken get from jwt key
@@ -112,8 +96,7 @@ const authController = {
     }
 
     //Update time
-    foundUser.lastUpdateAt = currentTime();
-    foundUser.lastActiveAt = currentTime();
+    Object.assign(foundUser, { lastUpdateAt: time, lastActiveAt: time });
     console.log(foundUser);
     await foundUser.save();
     res.status(200).json(`user ${foundUser.username} update successfully`);
@@ -122,16 +105,13 @@ const authController = {
     const cookie = req.signedCookies;
 
     //Check whether jwt key exist in cookie
-    if (!cookie.jwt) return res.sendStatus(204);
+    if (!cookie.jwt) return res.sendStatus(401);
 
     //Check validation of refreshToken get from jwt key
     const refreshToken = cookie.jwt;
 
     // Update Token save in db
-    const foundToken = await Tokens.findOneAndUpdate(
-      { refreshToken },
-      { accessToken: "", refreshToken: "" }
-    );
+    const foundToken = await Tokens.findOneAndUpdate({ refreshToken }, { accessToken: "", refreshToken: "" });
 
     //If user cannot be found, then throw http code 403
     !foundToken && _throw(403);
@@ -151,8 +131,9 @@ const authController = {
     const { user, email, phone, password } = req.body;
 
     //check for username has already existed in DB or not
-    const duplicate = await Users.findOne({ username: user }).exec();
-    duplicate && _throw(409, "User has existed");
+    (await Users.findOne({ username: user })) && _throw(409, "User has existed");
+    (await Users.findOne({ email: email })) && _throw(409, "Email has existed");
+    (await Users.findOne({ phone: phone })) && _throw(409, "Phone has existed");
 
     //encypt the password
     const hashedPwd = await bcrypt.hash(password, 10);

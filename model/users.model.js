@@ -1,38 +1,36 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import _throw from "../controller/throw.js";
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
   username: {
     type: String,
-    require: true,
+    require: [true, "require username"],
     validate: (val) => {
-      if (validator.isEmpty(val)) throw new Error("require username");
-      else if (val.length <= 3) throw new Error("username too short");
+      val.length <= 3 && _throw(400, "username too short");
     },
   },
   email: {
     type: String,
-    require: true,
+    require: [true, "require email"],
     validate: (val) => {
-      if (validator.isEmpty(val)) throw new Error("require email");
-      else if (!validator.isEmail(val)) throw new Error("invalid email");
+      !validator.isEmail(val) && _throw(400, "invalid email");
     },
   },
   phone: {
     type: String,
-    require: true,
+    require: [true, "require phone"],
     validate: (val) => {
-      if (validator.isEmpty(val)) throw new Error("require phone number");
-      else if (val.length <= 9) throw new Error("invalid phone");
+      !validator.isMobilePhone(val, "vi-VN") && _throw(400, "invalid phone");
     },
   },
   password: {
     type: String,
-    require: true,
+    require: [true, "require password"],
     validate: (val) => {
-      if (validator.isEmpty(val)) throw new Error("require password");
-      else if (val.length <= 8) throw new Error("password too short");
+      val.length <= 8 && _throw(400, "password too short");
+      !validator.isStrongPassword(val) && _throw(400, "password is weak");
     },
   },
   roles: {

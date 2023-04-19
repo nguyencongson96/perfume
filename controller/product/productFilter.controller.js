@@ -4,7 +4,6 @@ import keyQuery from "../../config/product/keyQuery.config.js";
 import sortConfig from "../../config/product/sortStyle.config.js";
 import asyncWrapper from "../../middleware/async.middleware.js";
 import _throw from "../throw.js";
-import { isEmpty } from "../checkType.js";
 
 const { limit } = Pagination;
 
@@ -25,9 +24,7 @@ const convertMatchCond = (arr, key) => {
   // If the key contains a number comparison symbol
   if (keyQuery.numberCompare.some((item) => key.includes(item))) {
     // Find the comparison symbol in the key
-    const foundCompare = Object.keys(compareSymbol).find((compare) =>
-      key.includes(compare)
-    );
+    const foundCompare = Object.keys(compareSymbol).find((compare) => key.includes(compare));
     return foundCompare
       ? arr.map((item) => {
           const newkey = key.replace(foundCompare, ""),
@@ -48,21 +45,16 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
     keyArr = Object.keys(query);
 
   //Check whether req.query has any key-value pairs or not
-  isEmpty(query) && _throw(400, "Query Params is required");
+  !query && _throw(400, "Query Params is required");
 
   //Check whether query has any key match allowKey array, if not send status 400
-  !keyArr.every((val) => keyQuery.filter.some((key) => val.includes(key))) &&
-    _throw(400, "Invalid key Query");
+  !keyArr.every((val) => keyQuery.filter.some((key) => val.includes(key))) && _throw(400, "Invalid key Query");
 
   //Check sort value
-  query.sort &&
-    !Object.values(sortConfig).includes(query.sort) &&
-    _throw(400, "Invalid sort Query");
+  query.sort && !Object.values(sortConfig).includes(query.sort) && _throw(400, "Invalid sort Query");
 
   //Check slice value
-  query.page &&
-    (!Number(query.page) || query.page < 1) &&
-    _throw(400, "Invalid page Query");
+  query.page && (!Number(query.page) || query.page < 1) && _throw(400, "Invalid page Query");
 
   // Find products that match the query object
   const products = await Products.aggregate(
@@ -94,8 +86,7 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
       query.sort
         ? {
             $sort: {
-              [query.sort.slice(0, 1) === "p" ? "price" : "name"]:
-                query.sort.slice(1, 3) === "ac" ? 1 : -1,
+              [query.sort.slice(0, 1) === "p" ? "price" : "name"]: query.sort.slice(1, 3) === "ac" ? 1 : -1,
             },
           }
         : false,

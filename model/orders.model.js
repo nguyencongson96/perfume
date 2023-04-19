@@ -1,21 +1,27 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import _throw from "../controller/throw.js";
+import orderStatus from "../config/order/status.config.js";
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
   userId: { type: mongoose.ObjectId, require: true },
-  name: String,
+  name: { type: String, require: [true, "Name required"] },
   phone: {
     type: String,
+    require: [true, "Phone required"],
     validate: (val) => {
-      !validator.isNumeric(val) && _throw(400, "Invalid phone number");
+      !validator.isMobilePhone(val, "vi-VN") &&
+        _throw(400, "Invalid phone number");
     },
   },
-  address: String,
+  address: { type: String, require: [true, "Address required"] },
   status: {
     type: String,
-    require: true,
+    require: [true, "Status required"],
+    validate: (val) => {
+      !orderStatus.updatebyUser.includes(val) && _throw(400, "Invalid status");
+    },
   },
   total: {
     type: Number,
