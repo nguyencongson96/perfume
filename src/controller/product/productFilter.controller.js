@@ -48,10 +48,13 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
   !query && _throw(400, "Query Params is required");
 
   //Check whether query has any key match allowKey array, if not send status 400
-  !keyArr.every((val) => keyQuery.filter.some((key) => val.includes(key))) && _throw(400, "Invalid key Query");
+  !keyArr.every((val) => keyQuery.filter.some((key) => val.includes(key))) &&
+    _throw(400, "Invalid key Query");
 
   //Check sort value
-  query.sort && !Object.values(sortConfig).includes(query.sort) && _throw(400, "Invalid sort Query");
+  query.sort &&
+    !Object.values(sortConfig).includes(query.sort) &&
+    _throw(400, "Invalid sort Query");
 
   //Check slice value
   query.page && (!Number(query.page) || query.page < 1) && _throw(400, "Invalid page Query");
@@ -86,13 +89,14 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
       query.sort
         ? {
             $sort: {
-              [query.sort.slice(0, 1) === "p" ? "price" : "name"]: query.sort.slice(1, 3) === "ac" ? 1 : -1,
+              [query.sort.slice(0, 1) === "p" ? "price" : "name"]:
+                query.sort.slice(1, 3) === "ac" ? 1 : -1,
             },
           }
         : false,
       //Slice
-      query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
       query.page ? { $limit: limit } : false,
+      query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
       //Remove pipeline does not appear in request
     ].filter(Boolean)
   );

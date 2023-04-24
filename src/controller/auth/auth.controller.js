@@ -34,18 +34,22 @@ const authController = {
     );
 
     //Generate new refreshToken
-    const refreshToken = jwt.sign({ username: foundUser.username }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
-    });
+    const refreshToken = jwt.sign(
+      { username: foundUser.username },
+      process.env.REFRESH_TOKEN_SECRET,
+      {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
+      }
+    );
 
     //Add refresh Token to Cookie
-    res.cookie("jwt", refreshToken, {
-      httpOnly: true,
-      maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
-      sameSite: "Lax",
-      secure: true,
-      signed: true,
-    });
+    // res.cookie("jwt", refreshToken, {
+    //   httpOnly: true,
+    //   maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
+    //   sameSite: "Lax",
+    //   secure: true,
+    //   signed: true,
+    // });
 
     //Save token to db
     await Tokens.findOneAndUpdate(
@@ -58,7 +62,8 @@ const authController = {
     res.json({
       username: foundUser.username,
       roles: foundRoles,
-      accessToken: accessToken,
+      accessToken,
+      refreshToken,
     });
   }),
   update: asyncWrapper(async (req, res) => {
@@ -111,7 +116,10 @@ const authController = {
     const refreshToken = cookie.jwt;
 
     // Update Token save in db
-    const foundToken = await Tokens.findOneAndUpdate({ refreshToken }, { accessToken: "", refreshToken: "" });
+    const foundToken = await Tokens.findOneAndUpdate(
+      { refreshToken },
+      { accessToken: "", refreshToken: "" }
+    );
 
     //If user cannot be found, then throw http code 403
     !foundToken && _throw(403);
