@@ -5,7 +5,8 @@ import asyncWrapper from "#root/middleware/async.middleware.js";
 import _throw from "#root/utils/throw.js";
 
 const handleRefreshToken = asyncWrapper(async (req, res) => {
-  const { jwt: refreshToken } = req.cookies;
+  // const { jwt: refreshToken } = req.cookies;
+  const { jwt: refreshToken } = req.body;
   //Check whether refreshToken apprear in cookies or not
   !refreshToken && _throw(401);
 
