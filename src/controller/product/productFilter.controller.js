@@ -95,8 +95,8 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
           }
         : false,
       //Slice
-      query.page ? { $limit: limit } : false,
       query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
+      query.page ? { $limit: limit } : false,
       //Remove pipeline does not appear in request
     ].filter(Boolean)
   );
