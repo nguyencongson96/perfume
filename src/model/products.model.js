@@ -7,16 +7,10 @@ const ProductSchema = new Schema({
   name: {
     type: String,
     require: [true, "Name Required"],
-    validate: (value) => {
-      !validator.isAlphanumeric(value) && _throw(400, "Invalid Name");
-    },
   },
   brand: {
     type: String,
     require: [true, "Brand Required"],
-    validate: (value) => {
-      !validator.isAlphanumeric(value) && _throw(400, "Invalid Brand");
-    },
   },
   image: { type: [String], require: [true, "Image Required"] },
   aroma: {
