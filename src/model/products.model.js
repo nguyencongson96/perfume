@@ -8,14 +8,14 @@ const ProductSchema = new Schema({
     type: String,
     require: [true, "Name Required"],
     validate: (value) => {
-      !validator.isAlphanumeric(value.replaceAll(" ", "")) && _throw(400, "Invalid Name");
+      !validator.isAlphanumeric(value) && _throw(400, "Invalid Name");
     },
   },
   brand: {
     type: String,
     require: [true, "Brand Required"],
     validate: (value) => {
-      !validator.isAlphanumeric(value.replaceAll(" ", "")) && _throw(400, "Invalid Brand");
+      !validator.isAlphanumeric(value) && _throw(400, "Invalid Brand");
     },
   },
   image: { type: [String], require: [true, "Image Required"] },
