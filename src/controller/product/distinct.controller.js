@@ -2,6 +2,7 @@ import Products from "#root/model/products.model.js";
 import keyQuery from "#root/config/product/keyQuery.config.js";
 import _throw from "#root/utils/throw.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
+import mongoose from "mongoose";
 
 const distinctKey = keyQuery.distinct;
 
@@ -27,8 +28,10 @@ const getDistinctList = asyncWrapper(async (req, res) => {
     return { ...obj, ...{ [field]: list } };
   }, {});
 
+  await mongoose.disconnect();
+
   // Send a JSON response with status code 200 containing the "result" object
-  res.status(200).json(result);
+  return res.status(200).json(result);
 });
 
 export default getDistinctList;

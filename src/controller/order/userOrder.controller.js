@@ -20,6 +20,8 @@ const handleOrderByUser = {
     const userId = foundUser._id;
     userId.toString() !== foundOrder.userId.toString() && _throw(401, "Permission is not granted");
 
+    await mongoose.disconnect();
+
     return res.status(200).json(foundOrder);
   }),
   addNewOrder: asyncWrapper(async (req, res) => {
@@ -33,7 +35,9 @@ const handleOrderByUser = {
     orderStatus.updatebyUser.every((key) => key !== status) && _throw(400, "Invalid status");
 
     //In case user logins, get userId of the user, otherwise, create a new one
-    const userId = !req.user ? await new mongoose.Types.ObjectId() : (await Users.findOne({ username: req.user }))._id;
+    const userId = !req.user
+      ? await new mongoose.Types.ObjectId()
+      : (await Users.findOne({ username: req.user }))._id;
 
     //Check whether user try to add new pending order or not
     status === "Pending" &&
@@ -41,7 +45,8 @@ const handleOrderByUser = {
         ? //In case user does not login, throw error if user try to add order with status Pending
           _throw(400, "Invalid status when not login")
         : //In case user logins, throw error if user try to add another Pending Order when they already have one
-          (await Orders.findOne({ userId, status: "Pending" })) && _throw(400, "An user have only one Pending Order"));
+          (await Orders.findOne({ userId, status: "Pending" })) &&
+          _throw(400, "An user have only one Pending Order"));
 
     //Update cart in order
     const { total, cart: newCart } = await updateCart(status, cart);
@@ -56,6 +61,8 @@ const handleOrderByUser = {
       createdAt: time,
       ...(status !== "Pending" && { lastUpdateAt: time, submitAt: time }),
     });
+
+    await mongoose.disconnect();
     return res.status(201).json(createdCart);
   }),
   getOrders: asyncWrapper(async (req, res) => {
@@ -63,6 +70,8 @@ const handleOrderByUser = {
     const foundOrders = await Orders.find({
       userId: (await Users.findOne({ username: req.user }, { userId: 0 }))._id,
     }).exec();
+
+    await mongoose.disconnect();
 
     return foundOrders.length === 0
       ? res.status(204).json(`There is no order yet`) // If there's no order has matched username, return a 204 status code with a message saying that there is no cart matched
@@ -77,6 +86,8 @@ const handleOrderByUser = {
       },
       { userId: 0 }
     ).exec();
+
+    await mongoose.disconnect();
 
     //If there is no Pending order, send status code 204
     return !foundOrder
@@ -109,6 +120,8 @@ const handleOrderByUser = {
 
     // Return the updated order
     await foundOrder.save();
+
+    await mongoose.disconnect();
     return res.status(200).json(foundOrder);
   }),
   deleteOrder: asyncWrapper(async (req, res) => {
@@ -117,6 +130,8 @@ const handleOrderByUser = {
       userId: (await Users.findOne({ username: req.user }))._id,
       status: "Pending",
     }).exec();
+
+    await mongoose.disconnect();
 
     //Check if there is any pending order to delete or not
     !foundOrder

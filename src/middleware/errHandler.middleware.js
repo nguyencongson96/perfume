@@ -13,7 +13,7 @@ const errHandler = (err, req, res, next) => {
     ? // If the error has a status property, return that status code with the error message as JSON
       res.status(err.status).json(err.message)
     : // Otherwise, return a 500 Internal Server Error status code with a generic error message
-      res.status(500).send("Error occurred while logging in");
+      res.status(500).send("Error occurred");
 };
 
 export default errHandler;

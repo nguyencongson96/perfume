@@ -6,6 +6,7 @@ import _throw from "#root/utils/throw.js";
 import currentTime from "#root/utils/currentTime.js";
 import userField from "#root/config/auth/userField.config.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
+import mongoose from "mongoose";
 
 const authController = {
   logIn: asyncWrapper(async (req, res) => {
@@ -34,13 +35,9 @@ const authController = {
     );
 
     //Generate new refreshToken
-    const refreshToken = jwt.sign(
-      { username: foundUser.username },
-      process.env.REFRESH_TOKEN_SECRET,
-      {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
-      }
-    );
+    const refreshToken = jwt.sign({ username: foundUser.username }, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
+    });
 
     //Add refresh Token to Cookie
     // res.cookie("jwt", refreshToken, {
@@ -58,14 +55,17 @@ const authController = {
       { runValidators: true, upsert: true, new: true }
     );
 
+    await mongoose.disconnect();
+
     //Send accessToken to frontend
-    res.json({
+    return res.json({
       username: foundUser.username,
       roles: foundRoles,
       accessToken,
       refreshToken,
     });
   }),
+
   update: asyncWrapper(async (req, res) => {
     const cookie = req.signedCookies,
       time = currentTime();
@@ -102,10 +102,12 @@ const authController = {
 
     //Update time
     Object.assign(foundUser, { lastUpdateAt: time, lastActiveAt: time });
-    console.log(foundUser);
+
     await foundUser.save();
+    await mongoose.disconnect();
     res.status(200).json(`user ${foundUser.username} update successfully`);
   }),
+
   logOut: asyncWrapper(async (req, res) => {
     const cookie = req.signedCookies;
 
@@ -116,10 +118,7 @@ const authController = {
     const refreshToken = cookie.jwt;
 
     // Update Token save in db
-    const foundToken = await Tokens.findOneAndUpdate(
-      { refreshToken },
-      { accessToken: "", refreshToken: "" }
-    );
+    const foundToken = await Tokens.findOneAndUpdate({ refreshToken }, { accessToken: "", refreshToken: "" });
 
     //If user cannot be found, then throw http code 403
     !foundToken && _throw(403);
@@ -132,8 +131,10 @@ const authController = {
     //Clear cookie
     res.clearCookie("jwt");
 
+    await mongoose.disconnect();
+
     //Throw status code 204 if success
-    res.status(200).json("Log out successfully");
+    return res.status(200).json("Log out successfully");
   }),
   register: asyncWrapper(async (req, res) => {
     const { user, email, phone, password } = req.body;
@@ -153,7 +154,7 @@ const authController = {
       password: hashedPwd,
       createAt: currentTime(),
     });
-    console.log(result);
+    await mongoose.disconnect();
     res.status(201).json(`New user ${user} has been created`);
   }),
 };

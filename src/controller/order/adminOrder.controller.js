@@ -3,6 +3,7 @@ import Products from "#root/model/products.model.js";
 import _throw from "#root/utils/throw.js";
 import orderStatus from "#root/config/order/status.config.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
+import mongoose from "mongoose";
 
 const handleOrderByAdmin = {
   getOrders: asyncWrapper(async (req, res) => {
@@ -11,6 +12,8 @@ const handleOrderByAdmin = {
 
     // If there is no order with that id, return a 204 status code with a message saying that there is no cart match id
     if (!foundOrders) return res.status(204).json({ msg: `There is no order yet` });
+
+    await mongoose.disconnect();
 
     // Otherwise, return a 200 status code with the found order as a JSON object in the response body
     return res.status(200).json({ total: foundOrders.length, list: foundOrders });
@@ -22,6 +25,7 @@ const handleOrderByAdmin = {
 
     //Response 204 if cannot find the order
     if (!foundOrder) return res.status(204).json({ msg: `Cannot find Order` });
+    await mongoose.disconnect();
     return res.status(200).json(foundOrder);
   }),
   updateOrder: asyncWrapper(async (req, res) => {
@@ -56,6 +60,8 @@ const handleOrderByAdmin = {
 
     // Return the updated order
     const updateOrder = await foundOrder.save();
+
+    await mongoose.disconnect();
     return res.status(200).json(updateOrder);
   }),
 };

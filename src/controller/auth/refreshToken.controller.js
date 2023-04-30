@@ -3,6 +3,7 @@ import Users from "#root/model/users.model.js";
 import Tokens from "#root/model/token.model.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
 import _throw from "#root/utils/throw.js";
+import mongoose from "mongoose";
 
 const handleRefreshToken = asyncWrapper(async (req, res) => {
   // const { jwt: refreshToken } = req.cookies;
@@ -32,9 +33,10 @@ const handleRefreshToken = asyncWrapper(async (req, res) => {
     //Save new accessToken to db
     foundToken.accessToken = accessToken;
     await foundToken.save();
+    await mongoose.disconnect();
 
     //Send new accessToken to front
-    res.json({ accessToken });
+    return res.json({ accessToken });
   });
 });
 

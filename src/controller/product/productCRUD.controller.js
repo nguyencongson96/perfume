@@ -1,11 +1,9 @@
 import Products from "#root/model/products.model.js";
-import Pagination from "#root/config/product/pagination.config.js";
 import keyQuery from "#root/config/product/keyQuery.config.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
 import _throw from "#root/utils/throw.js";
 import currentTime from "#root/utils/currentTime.js";
-
-const { limit } = Pagination;
+import mongoose from "mongoose";
 
 const productCRUD = {
   getAllProduct: asyncWrapper(async (req, res) => {
@@ -13,9 +11,9 @@ const productCRUD = {
     if (!productsList || productsList.length === 0) {
       return res.status(204).json({ msg: "No product found" });
     }
-    res.json({
+    await mongoose.disconnect();
+    return res.json({
       total: productsList.length,
-      limit: limit,
       list: productsList,
     });
   }),
@@ -30,8 +28,10 @@ const productCRUD = {
       lastUpdateAt: time,
     });
 
+    await mongoose.disconnect();
+
     // Return the newly created product with a status of 201
-    res.status(201).json(newProduct);
+    return res.status(201).json(newProduct);
   }),
   updateProduct: asyncWrapper(async (req, res) => {
     // Extract the id and the rest of the fields from the request body
@@ -51,8 +51,10 @@ const productCRUD = {
     // If no product is found with the given id, return a 204 status code
     if (!foundProduct) return res.status(204).json(`There is no product match ID ${id}`);
 
+    await mongoose.disconnect();
+
     // Return the updated product with a status of 200
-    res.status(200).json(foundProduct);
+    return res.status(200).json(foundProduct);
   }),
   deleteProduct: asyncWrapper(async (req, res) => {
     // Extract the id from the request parameters
@@ -63,6 +65,8 @@ const productCRUD = {
 
     // Find and delete the product with the given id
     const deleteProduct = await Products.findByIdAndDelete(id);
+
+    await mongoose.disconnect();
 
     // If no product is found with the given id, return a 204 status code
     !deleteProduct
@@ -79,10 +83,10 @@ const productCRUD = {
     // Find the product with the given id
     const foundProduct = await Products.findById(id);
 
+    await mongoose.disconnect();
+
     // If no product is found with the given id, return a 204 status code
-    !foundProduct
-      ? _throw(404, `There is no product matched ID ${id}`)
-      : res.status(200).json(foundProduct); // Return the found product with a status of 200
+    !foundProduct ? _throw(404, `There is no product matched ID ${id}`) : res.status(200).json(foundProduct); // Return the found product with a status of 200
   }),
   test: async (req, res) => {
     try {
