@@ -105,7 +105,6 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
     )
   )[0];
 
-  await mongoose.disconnect();
   return res.status(200).json(products);
 });
 

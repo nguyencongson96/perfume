@@ -11,7 +11,7 @@ const productCRUD = {
     if (!productsList || productsList.length === 0) {
       return res.status(204).json({ msg: "No product found" });
     }
-    await mongoose.disconnect();
+
     return res.json({
       total: productsList.length,
       list: productsList,
@@ -51,8 +51,6 @@ const productCRUD = {
     // If no product is found with the given id, return a 204 status code
     if (!foundProduct) return res.status(204).json(`There is no product match ID ${id}`);
 
-    await mongoose.disconnect();
-
     // Return the updated product with a status of 200
     return res.status(200).json(foundProduct);
   }),
@@ -65,8 +63,6 @@ const productCRUD = {
 
     // Find and delete the product with the given id
     const deleteProduct = await Products.findByIdAndDelete(id);
-
-    await mongoose.disconnect();
 
     // If no product is found with the given id, return a 204 status code
     !deleteProduct
@@ -82,8 +78,6 @@ const productCRUD = {
 
     // Find the product with the given id
     const foundProduct = await Products.findById(id);
-
-    await mongoose.disconnect();
 
     // If no product is found with the given id, return a 204 status code
     !foundProduct ? _throw(404, `There is no product matched ID ${id}`) : res.status(200).json(foundProduct); // Return the found product with a status of 200

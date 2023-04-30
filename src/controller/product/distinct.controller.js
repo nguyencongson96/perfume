@@ -28,8 +28,6 @@ const getDistinctList = asyncWrapper(async (req, res) => {
     return { ...obj, ...{ [field]: list } };
   }, {});
 
-  await mongoose.disconnect();
-
   // Send a JSON response with status code 200 containing the "result" object
   return res.status(200).json(result);
 });

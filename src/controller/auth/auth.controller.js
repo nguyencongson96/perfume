@@ -55,8 +55,6 @@ const authController = {
       { runValidators: true, upsert: true, new: true }
     );
 
-    await mongoose.disconnect();
-
     //Send accessToken to frontend
     return res.json({
       username: foundUser.username,
@@ -104,7 +102,6 @@ const authController = {
     Object.assign(foundUser, { lastUpdateAt: time, lastActiveAt: time });
 
     await foundUser.save();
-    await mongoose.disconnect();
     res.status(200).json(`user ${foundUser.username} update successfully`);
   }),
 
@@ -131,8 +128,6 @@ const authController = {
     //Clear cookie
     res.clearCookie("jwt");
 
-    await mongoose.disconnect();
-
     //Throw status code 204 if success
     return res.status(200).json("Log out successfully");
   }),
@@ -154,7 +149,6 @@ const authController = {
       password: hashedPwd,
       createAt: currentTime(),
     });
-    await mongoose.disconnect();
     res.status(201).json(`New user ${user} has been created`);
   }),
 };

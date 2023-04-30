@@ -13,10 +13,13 @@ import productIndex from "#root/routes/product/index.js";
 import orderIndex from "#root/routes/orders/index.js";
 import filter from "#root/routes/filter.route.js";
 import refresh from "#root/routes/auth/refresh.route.js";
-import dbConnect from "#root/middleware/dbConnect.middleware.js";
+import dbConnect from "#root/utils/dbConnect.js";
 import errHandler from "#root/middleware/errHandler.middleware.js";
 import credentials from "#root/middleware/credentials.middleware.js";
 const PORT = process.env.PORT || 4000;
+
+//Connect to mongoDB
+dbConnect();
 
 //Handle options credentials check  - before CORS and fetch cookies credentials requirement
 app.use(credentials);
@@ -36,9 +39,6 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 //build-in middleware for static files
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use("/", express.static(path.join(__dirname, "public")));
-
-//Connect to mongoDB
-app.use(dbConnect);
 
 //Routes
 app.use("/auth", auth);

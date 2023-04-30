@@ -33,7 +33,6 @@ const handleRefreshToken = asyncWrapper(async (req, res) => {
     //Save new accessToken to db
     foundToken.accessToken = accessToken;
     await foundToken.save();
-    await mongoose.disconnect();
 
     //Send new accessToken to front
     return res.json({ accessToken });
