@@ -28,8 +28,6 @@ const productCRUD = {
       lastUpdateAt: time,
     });
 
-    await mongoose.disconnect();
-
     // Return the newly created product with a status of 201
     return res.status(201).json(newProduct);
   }),
