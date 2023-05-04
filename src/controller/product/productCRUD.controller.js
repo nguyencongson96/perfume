@@ -3,7 +3,6 @@ import keyQuery from "#root/config/product/keyQuery.config.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
 import _throw from "#root/utils/throw.js";
 import currentTime from "#root/utils/currentTime.js";
-import mongoose from "mongoose";
 
 const productCRUD = {
   getAllProduct: asyncWrapper(async (req, res) => {
