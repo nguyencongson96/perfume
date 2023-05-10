@@ -1,5 +1,5 @@
 const keyQuery = {
-  getList: ["name", "phone", "address", "status", "total"],
+  getList: ["_id", "name", "phone", "address", "status", "total"],
   filter: ["name", "phone"],
 };
 
