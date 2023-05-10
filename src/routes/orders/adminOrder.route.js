@@ -8,7 +8,7 @@ import ROLES_LIST from "#root/config/auth/rolesList.config.js";
 router.use(verifyJWT, verifyRoles(ROLES_LIST.Admin));
 
 //Route get all order from all users
-router.route("/").get(handleOrderByAdmin.getOrders);
+router.route("/").get(handleOrderByAdmin.filterOrders);
 
 //Route get infor of one order and route update infor of one order
 router.route("/:id").get(handleOrderByAdmin.getOneOrder).put(handleOrderByAdmin.updateOrder);

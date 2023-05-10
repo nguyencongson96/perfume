@@ -12,7 +12,7 @@ export default function convertMatchCondition(arr, key) {
   return keyQuery.numberCompare.includes(key)
     ? arr.length === 2
       ? arr.map((item, index) => (item ? { [key]: { [index === 0 ? "$gte" : "$lte"]: Number(item) } } : {}))
-      : { [key]: { $eq: Number(arr[0]) } }
+      : { 0: { [key]: { $eq: Number(arr[0]) } } }
     : // If the key does not contain a number comparison symbol
     keyQuery.includeCompare.includes(key) //If the key contains an include comparison symbol
     ? arr.map((item) => (item ? { [key]: new RegExp(item, "i") } : {})) // Return an array of objects with a regular expression
