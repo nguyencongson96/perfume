@@ -38,6 +38,13 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
         //filter to match conditions
         { $match: matchCondition },
 
+        //Get random product, and auto set random number is limit
+        query.random ? { $sample: { size: Number(query.random || limit) } } : false,
+
+        // Paginate the results
+        query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
+        query.page ? { $limit: limit } : false,
+
         //Sort by one of 2 fields are price or name
         query.sort
           ? {
@@ -65,13 +72,6 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
         { $unwind: "$totalCount" },
         { $unwind: "$list" },
 
-        //Get random product, and auto set random number is limit
-        query.random ? { $sample: { size: limit } } : false,
-
-        // Paginate the results
-        query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
-        query.page ? { $limit: limit } : false,
-
         // Replace the root of the results
         {
           $replaceRoot: {
@@ -93,13 +93,6 @@ const getProductsByFilter = asyncWrapper(async (req, res) => {
               $push: keyQuery.getList.reduce((obj, val) => {
                 return { ...obj, [val]: `$list.${val}` };
               }, {}),
-              // {
-              //   _id: "$list._id",
-              //   name: "$list.name",
-              //   image: "$list.image",
-              //   price: "$list.price",
-              //   stock: "$list.stock",
-              // },
             },
           },
         },

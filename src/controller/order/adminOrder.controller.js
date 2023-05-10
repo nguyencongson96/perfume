@@ -82,6 +82,10 @@ const handleOrderByAdmin = {
           //filter to match conditions
           { $match: matchCondition },
 
+          // Paginate the results
+          query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
+          query.page ? { $limit: limit } : false,
+
           //Get total product meet the condition and get remove unnecessary field of each product
           {
             $facet: {
@@ -99,10 +103,6 @@ const handleOrderByAdmin = {
           //Deconstructs array of field totalCount and list
           { $unwind: "$totalCount" },
           { $unwind: "$list" },
-
-          // Paginate the results
-          query.page > 1 ? { $skip: limit * (query.page - 1) } : false,
-          query.page ? { $limit: limit } : false,
 
           // Replace the root of the results
           {
