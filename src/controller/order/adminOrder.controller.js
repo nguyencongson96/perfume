@@ -36,13 +36,13 @@ const handleOrderByAdmin = {
     // Throw error if id value is invalid
     !id && _throw(400, "Id is required");
 
-    //Throw error if status value is invalid
-    foundOrder.status === "Cancelled" && _throw(400, "Cannot update cancelled order");
-    status && !orderStatus.updatebyAdmin.includes(status) && _throw(400, "Invalid status");
-
     //Response 204 if cannot find the order
     const foundOrder = await Orders.findById(id);
     !foundOrder && _throw(404, `Cannot find Order`);
+
+    //Throw error if status value is invalid
+    foundOrder.status === "Cancelled" && _throw(400, "Cannot update cancelled order");
+    status && !orderStatus.updatebyAdmin.includes(status) && _throw(400, "Invalid status");
 
     //Check for each case of former status
     if (status === "Cancelled") {

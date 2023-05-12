@@ -19,7 +19,7 @@ const orderSchema = new Schema({
     type: String,
     require: [true, "Status required"],
     validate: (val) => {
-      !orderStatus.updatebyUser.includes(val) && _throw(400, "Invalid status");
+      !orderStatus.all.includes(val) && _throw(400, "Invalid status");
     },
   },
   total: {

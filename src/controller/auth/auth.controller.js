@@ -54,9 +54,10 @@ const authController = {
       { userId: foundUser._id, accessToken, refreshToken },
       { runValidators: true, upsert: true, new: true }
     );
+    console.log("connected");
 
     //Send accessToken to frontend
-    return res.json({
+    return res.status(200).json({
       username: foundUser.username,
       roles: foundRoles,
       accessToken,
