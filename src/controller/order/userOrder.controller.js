@@ -12,7 +12,7 @@ const handleOrderByUser = {
     const { id } = req.params;
 
     //Find order based on id params
-    const foundOrder = await Orders.findById(id);
+    const foundOrder = await Orders.findById(id).lean();
     if (!foundOrder) return res.status(204).json(`Cannot find Order`);
 
     //Throw error if cannot find user
@@ -20,7 +20,7 @@ const handleOrderByUser = {
     const userId = foundUser._id;
     userId.toString() !== foundOrder.userId.toString() && _throw(401, "Permission is not granted");
 
-    return res.status(200).json(foundOrder);
+    return res.status(200).json({ ...foundOrder, ...(await updateCart(foundOrder.status, foundOrder.cart)) });
   }),
   addNewOrder: asyncWrapper(async (req, res) => {
     const { status, cart } = req.body,
@@ -80,12 +80,14 @@ const handleOrderByUser = {
         status: "Pending",
       },
       { userId: 0 }
-    ).exec();
+    )
+      .lean()
+      .exec();
 
     //If there is no Pending order, send status code 204
     return !foundOrder
       ? res.status(204).json(`User does not have any pending order`)
-      : res.status(200).json(foundOrder);
+      : res.status(200).json({ ...foundOrder, ...(await updateCart(foundOrder.status, foundOrder.cart)) });
   }),
   updateOrder: asyncWrapper(async (req, res) => {
     const { status, cart } = req.body,
