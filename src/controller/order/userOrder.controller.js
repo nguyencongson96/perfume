@@ -79,7 +79,7 @@ const handleOrderByUser = {
         userId: (await Users.findOne({ username: req.user }))._id,
         status: "Pending",
       },
-      { userId: 0 }
+      { _id: 1, status: 1, total: 1, cart: 1 }
     )
       .lean()
       .exec();
