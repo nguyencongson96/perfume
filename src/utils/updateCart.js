@@ -15,6 +15,8 @@ export default async function updateCart(newStatus, newCart) {
 
     //Update price
     const price = foundProduct.price[capacityIndex];
+    const image = foundProduct.image;
+    const name = foundProduct.name;
 
     //Update stock
     let stock = foundProduct.stock[capacityIndex];
@@ -28,7 +30,7 @@ export default async function updateCart(newStatus, newCart) {
     }
 
     //Push product to order, calculate total price of order, and only minus stock if status is no longer Pending
-    resultCart.push({ productId, quantity, capacity, price });
+    resultCart.push({ productId, quantity, capacity, price, name, image });
     total += quantity * price;
   }
   return { total: total, cart: resultCart };

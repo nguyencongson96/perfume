@@ -6,6 +6,7 @@ import asyncWrapper from "#root/middleware/async.middleware.js";
 import Pagination from "#root/config/product/pagination.config.js";
 import convertMatchCondition from "../../utils/convertMatchCondition.js";
 import keyQuery from "#root/config/order/keyQuery.config.js";
+import updateCart from "#root/utils/updateCart.js";
 
 const { limit } = Pagination;
 
@@ -23,11 +24,12 @@ const handleOrderByAdmin = {
   getOneOrder: asyncWrapper(async (req, res) => {
     const { id } = req.params;
 
-    const foundOrder = await Orders.findById(id);
+    const foundOrder = await Orders.findById(id).lean().exec();
 
     //Response 204 if cannot find the order
-    if (!foundOrder) return res.status(204).json({ msg: `Cannot find Order` });
-    return res.status(200).json(foundOrder);
+    return !foundOrder
+      ? res.status(204).json({ msg: `Cannot find Order` })
+      : res.status(200).json({ ...foundOrder, ...(await updateCart(foundOrder.status, foundOrder.cart)) });
   }),
   updateOrder: asyncWrapper(async (req, res) => {
     const { id } = req.params,
