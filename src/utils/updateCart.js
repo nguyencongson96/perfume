@@ -33,5 +33,5 @@ export default async function updateCart(newStatus, newCart) {
     resultCart.push({ productId, quantity, capacity, price, name, image });
     total += quantity * price;
   }
-  return { total: total, cart: resultCart };
+  return { total: total, cart: { total: newCart.length, detail: resultCart } };
 }
