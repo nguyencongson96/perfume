@@ -28,8 +28,14 @@ const handleOrderByAdmin = {
 
     //Response 204 if cannot find the order
     return !foundOrder
-      ? res.status(204).json({ msg: `Cannot find Order` })
-      : res.status(200).json({ ...foundOrder, ...(await updateCart(foundOrder.status, foundOrder.cart)) });
+      ? res.status(204).json(`Cannot find Order`)
+      : res
+          .status(200)
+          .json(
+            !foundOrder.cart || foundOrder.cart.length === 0
+              ? foundOrder
+              : { ...foundOrder, ...(await updateCart(foundOrder.status, foundOrder.cart)) }
+          );
   }),
   updateOrder: asyncWrapper(async (req, res) => {
     const { id } = req.params,
