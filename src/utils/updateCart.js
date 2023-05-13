@@ -3,7 +3,8 @@ import _throw from "#root/utils/throw.js";
 
 export default async function updateCart(newStatus, newCart) {
   let resultCart = [],
-    total = 0;
+    total = 0,
+    totalItem = 0;
   for (const { productId, quantity, capacity } of newCart) {
     //Find product
     const foundProduct = await Products.findById(productId);
@@ -32,6 +33,7 @@ export default async function updateCart(newStatus, newCart) {
     //Push product to order, calculate total price of order, and only minus stock if status is no longer Pending
     resultCart.push({ productId, quantity, capacity, price, name, image });
     total += quantity * price;
+    totalItem += quantity;
   }
-  return { total: total, cart: { totalItem: newCart.length, detail: resultCart } };
+  return { total: total, cart: { totalItem, detail: resultCart } };
 }
