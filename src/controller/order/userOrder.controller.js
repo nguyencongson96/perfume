@@ -55,7 +55,7 @@ const handleOrderByUser = {
       userId,
       status,
       total,
-      cart: newCart,
+      cart: newCart.detail,
       createdAt: time,
       ...(status !== "Pending" && { lastUpdateAt: time, submitAt: time }),
     });
@@ -84,9 +84,11 @@ const handleOrderByUser = {
       .lean()
       .exec();
 
+    console.log(foundOrder);
+
     //If there is no Pending order, send status code 204
-    return !foundOrder
-      ? res.status(204).json(`User does not have any pending order`)
+    return !foundOrder || foundOrder.cart || foundOrder.cart.length === 0
+      ? res.status(200).json(`User does not have any pending order`)
       : res.status(200).json({ ...foundOrder, ...(await updateCart(foundOrder.status, foundOrder.cart)) });
   }),
   updateOrder: asyncWrapper(async (req, res) => {
