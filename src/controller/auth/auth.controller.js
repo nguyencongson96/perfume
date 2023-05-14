@@ -121,6 +121,7 @@ const authController = {
     //Throw status code 204 if success
     return res.status(200).json("Log out successfully");
   }),
+
   register: asyncWrapper(async (req, res) => {
     const { user, email, phone, password } = req.body;
 
