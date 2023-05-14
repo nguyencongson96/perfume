@@ -3,7 +3,7 @@ import keyQuery from "#root/config/keyQuery.config.js";
 import _throw from "#root/utils/throw.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
 
-const distinctKey = keyQuery.distinct;
+const distinctKey = keyQuery.product.distinct;
 
 // Define an asynchronous function named getDistinctList that accepts two parameters, req and res
 const getDistinctList = asyncWrapper(async (req, res) => {
