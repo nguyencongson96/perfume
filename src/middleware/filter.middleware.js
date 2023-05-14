@@ -5,9 +5,6 @@ const filterCheck = (req, res, next) => {
   const query = req.query,
     keyArr = Object.keys(query);
 
-  //Check whether req.query has any key-value pairs or not
-  keyArr.length === 0 && _throw(400, "Query Params is required");
-
   //Check whether query has any key match allowKey array, if not send status 400
   !keyArr.every((val) => keyQuery.filter.some((key) => val.includes(key))) &&
     _throw(400, "Invalid key Query");
