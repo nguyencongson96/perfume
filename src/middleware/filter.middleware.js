@@ -1,6 +1,5 @@
 import _throw from "#root/utils/throw.js";
-import keyQuery from "#root/config/product/keyQuery.config.js";
-import sortConfig from "#root/config/product/sortStyle.config.js";
+import keyQuery from "#root/config/keyQuery.config.js";
 
 const filterCheck = (req, res, next) => {
   const query = req.query,
@@ -14,7 +13,7 @@ const filterCheck = (req, res, next) => {
     _throw(400, "Invalid key Query");
 
   //Check sort value
-  query.sort && !Object.values(sortConfig).includes(query.sort) && _throw(400, "Invalid sort Query");
+  query.sort && !["nac", "ndc", "pac", "pdc"].includes(query.sort) && _throw(400, "Invalid sort Query");
 
   //Check slice value
   query.page && (!Number(query.page) || query.page < 1) && _throw(400, "Invalid page Query");

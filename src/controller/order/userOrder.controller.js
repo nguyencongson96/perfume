@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Orders from "#root/model/orders.model.js";
 import Users from "#root/model/users.model.js";
 import _throw from "#root/utils/throw.js";
-import orderStatus from "#root/config/order/status.config.js";
+import orderStatus from "#root/config/status.config.js";
 import currentTime from "#root/utils/currentTime.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
 import updateCart from "#root/utils/updateCart.js";

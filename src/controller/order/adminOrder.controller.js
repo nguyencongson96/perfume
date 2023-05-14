@@ -1,14 +1,12 @@
 import Orders from "#root/model/orders.model.js";
 import Products from "#root/model/products.model.js";
 import _throw from "#root/utils/throw.js";
-import orderStatus from "#root/config/order/status.config.js";
+import orderStatus from "#root/config/status.config.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
-import Pagination from "#root/config/product/pagination.config.js";
+import limit from "#root/config/pagination.config.js";
 import convertMatchCondition from "../../utils/convertMatchCondition.js";
-import keyQuery from "#root/config/order/keyQuery.config.js";
+import keyQuery from "#root/config/keyQuery.config.js";
 import updateCart from "#root/utils/updateCart.js";
-
-const { limit } = Pagination;
 
 const handleOrderByAdmin = {
   getOrders: asyncWrapper(async (req, res) => {
@@ -75,20 +73,12 @@ const handleOrderByAdmin = {
   filterOrders: asyncWrapper(async (req, res) => {
     const query = req.query;
 
-    const matchCondition = Object.entries(query).reduce((obj, [key, value]) => {
-      return {
-        ...obj,
-        ...(keyQuery.filter.includes(key) && convertMatchCondition(value.split(), key)[0]), // else do not use and or or operator
-      };
-    }, {});
-    console.log(matchCondition);
-
     // Find orders that match the query object
     const orders = (
       await Orders.aggregate(
         [
           //filter to match conditions
-          { $match: matchCondition },
+          { $match: convertMatchCondition("order", query) },
 
           //Get total product meet the condition and get remove unnecessary field of each product
           {
@@ -96,7 +86,7 @@ const handleOrderByAdmin = {
               totalCount: [{ $count: "total" }],
               list: [
                 {
-                  $project: keyQuery.getList.reduce((obj, val) => {
+                  $project: keyQuery.order.getList.reduce((obj, val) => {
                     return { ...obj, [val]: 1 };
                   }, {}),
                 },
@@ -130,7 +120,7 @@ const handleOrderByAdmin = {
               total: { $avg: "$total" },
               numberOfPages: { $avg: "$pages" },
               list: {
-                $push: keyQuery.getList.reduce((obj, val) => {
+                $push: keyQuery.order.getList.reduce((obj, val) => {
                   return { ...obj, [val]: `$list.${val}` };
                 }, {}),
               },

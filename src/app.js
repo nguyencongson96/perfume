@@ -11,7 +11,6 @@ import { corsOptions } from "#root/config/corsOptions.config.js";
 import auth from "#root/routes/auth/auth.route.js";
 import productIndex from "#root/routes/product/index.js";
 import orderIndex from "#root/routes/orders/index.js";
-import filter from "#root/routes/filter.route.js";
 import refresh from "#root/routes/auth/refresh.route.js";
 import dbConnect from "#root/utils/dbConnect.js";
 import errHandler from "#root/middleware/errHandler.middleware.js";
@@ -44,7 +43,6 @@ app.use("/", express.static(path.join(__dirname, "public")));
 app.use("/auth", auth);
 app.use("/refresh", refresh);
 app.use("/products", productIndex);
-app.use("/filter", filter);
 app.use("/order", orderIndex);
 
 //Handle Errors

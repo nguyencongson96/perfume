@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import _throw from "#root/utils/throw.js";
-import orderStatus from "#root/config/order/status.config.js";
+import orderStatus from "#root/config/status.config.js";
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({

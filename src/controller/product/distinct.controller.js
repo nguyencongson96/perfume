@@ -1,8 +1,7 @@
 import Products from "#root/model/products.model.js";
-import keyQuery from "#root/config/product/keyQuery.config.js";
+import keyQuery from "#root/config/keyQuery.config.js";
 import _throw from "#root/utils/throw.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
-import mongoose from "mongoose";
 
 const distinctKey = keyQuery.distinct;
 
