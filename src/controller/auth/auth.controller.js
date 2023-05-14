@@ -6,7 +6,6 @@ import _throw from "#root/utils/throw.js";
 import currentTime from "#root/utils/currentTime.js";
 import userField from "#root/config/auth/userField.config.js";
 import asyncWrapper from "#root/middleware/async.middleware.js";
-import mongoose from "mongoose";
 
 const authController = {
   logIn: asyncWrapper(async (req, res) => {
@@ -39,22 +38,12 @@ const authController = {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
     });
 
-    //Add refresh Token to Cookie
-    // res.cookie("jwt", refreshToken, {
-    //   httpOnly: true,
-    //   maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRATION) * 24 * 60 * 60 * 1000,
-    //   sameSite: "Lax",
-    //   secure: true,
-    //   signed: true,
-    // });
-
     //Save token to db
     await Tokens.findOneAndUpdate(
       { userId: foundUser._id },
       { userId: foundUser._id, accessToken, refreshToken },
       { runValidators: true, upsert: true, new: true }
     );
-    console.log("connected");
 
     //Send accessToken to frontend
     return res.status(200).json({
@@ -150,7 +139,7 @@ const authController = {
       password: hashedPwd,
       createAt: currentTime(),
     });
-    res.status(201).json(`New user ${user} has been created`);
+    res.status(201).json(`New user ${result.username} has been created`);
   }),
 };
 
