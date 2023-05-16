@@ -139,7 +139,7 @@ const productCRUD = {
     // If no product is found with the given id, return a 204 status code
     !deleteProduct
       ? res.status(204).json(`There is no product match ID ${id}`)
-      : res.status(200).json(`Product ID ${id} has been deleted`); // Return a success message with a status of 200
+      : res.status(200).json(deleteProduct); // Return a success message with a status of 200
   }),
   getAProduct: asyncWrapper(async (req, res) => {
     // Extract the id from the request parameters
