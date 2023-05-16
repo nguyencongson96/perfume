@@ -16,7 +16,7 @@ const keyQuery = {
   ],
   order: {
     getList: ["_id", "name", "phone", "address", "status", "total", "submitAt"],
-    includeCompare: ["name"],
+    includeCompare: ["name", "phone"],
     numberCompare: [],
   },
   product: {
